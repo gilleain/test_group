@@ -1,9 +1,11 @@
 package test;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.openscience.cdk.Atom;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.DefaultChemObjectBuilder;
+import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.graph.invariant.EquivalentClassPartitioner;
 import org.openscience.cdk.group.AtomContainerPrinter;
@@ -14,10 +16,120 @@ import org.openscience.cdk.group.PermutationGroup;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
+import org.openscience.cdk.templates.MoleculeFactory;
+import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 public class AtomTests {
 	
 	public final static IChemObjectBuilder builder = DefaultChemObjectBuilder.getInstance(); 
+
+	@Test
+	public void testAromaticSystem() throws Exception {
+
+		IAtomContainer mol = MoleculeFactory.makeAzulene();
+		Assert.assertNotNull("Created molecule was null", mol);
+
+		AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(mol);
+		CDKHueckelAromaticityDetector.detectAromaticity(mol);
+		
+		AtomDiscretePartitionRefiner refiner = new AtomDiscretePartitionRefiner();
+		refiner.refine(mol);
+		Partition autP = refiner.getAutomorphismPartition();
+		
+		Assert.assertEquals(
+				"Wrong number of equivalent classes", 6, autP.size());
+		Partition expected = Partition.fromString("0,4|1,3|2|5,9|6,8|7");
+		Assert.assertEquals("Wrong class assignment", expected, autP);
+	}
+	
+	@Test
+	public void testAlphaPinene() throws Exception {
+		IAtomContainer mol = MoleculeFactory.makeAlphaPinene();
+		AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(mol);
+		CDKHueckelAromaticityDetector.detectAromaticity(mol);
+		Assert.assertNotNull("Created molecule was null", mol);
+		
+		AtomDiscretePartitionRefiner refiner = new AtomDiscretePartitionRefiner();
+		refiner.refine(mol);
+		Partition autP = refiner.getAutomorphismPartition();
+		
+		Assert.assertEquals("Wrong number of equivalent classes", 9, autP.size());
+		Partition expected = Partition.fromString("0|1|2|3|4|5|6|7|8,9");
+		Assert.assertEquals("Wrong class assignment", expected, autP);
+	}
+	
+	 /**
+     * Test the equivalent classes method in pyrimidine
+     * Tests if the position of the single and double bonds in an aromatic ring matter
+     * to assign a class.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testPyrimidine() throws Exception {
+        IAtomContainer mol = MoleculeFactory.makePyrimidine();
+        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(mol);
+        CDKHueckelAromaticityDetector.detectAromaticity(mol);
+        Assert.assertNotNull("Created molecule was null", mol);
+        
+        AtomDiscretePartitionRefiner refiner = new AtomDiscretePartitionRefiner();
+		refiner.refine(mol);
+		Partition autP = refiner.getAutomorphismPartition();
+		
+		Assert.assertEquals("Wrong number of equivalent classes", 4, autP.size());
+		Partition expected = Partition.fromString("0,4|1,3|2|5");
+		Assert.assertEquals("Wrong class assignment", expected, autP);
+    }
+
+    /**
+     * Test the equivalent classes method in biphenyl,
+     * a molecule with two aromatic systems. It has 2 symmetry axis.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testBiphenyl() throws Exception {
+        IAtomContainer mol = MoleculeFactory.makeBiphenyl();
+        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(mol);
+        CDKHueckelAromaticityDetector.detectAromaticity(mol);
+        Assert.assertNotNull("Created molecule was null", mol);
+        
+        AtomDiscretePartitionRefiner refiner = new AtomDiscretePartitionRefiner();
+		refiner.refine(mol);
+		Partition autP = refiner.getAutomorphismPartition();
+		
+		Assert.assertEquals("Wrong number of equivalent classes", 4, autP.size());
+		Partition expected = Partition.fromString("0,6|1,5,7,11|2,4,8,10|3,9");
+		Assert.assertEquals("Wrong class assignment", expected, autP);
+    }
+
+    /**
+     * Test the equivalent classes method in imidazole,
+     * an aromatic molecule with a proton that can be exchanged between two aromatic nitrogens.
+     * The method should have failed because only one tautomer is considered,
+     * but there is no priority class for nodes of type ArNH to distinguish the nitrogens.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testImidazole() throws Exception {
+        IAtomContainer mol = MoleculeFactory.makeImidazole();
+        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(mol);
+        CDKHueckelAromaticityDetector.detectAromaticity(mol);
+        Assert.assertNotNull("Created molecule was null", mol);
+        EquivalentClassPartitioner it = new EquivalentClassPartitioner(mol);
+        int [] equivalentClass = it.getTopoEquivClassbyHuXu(mol);
+        char[] arrEquivalent = new char[mol.getAtomCount()];
+        for (int i = 1; i < equivalentClass.length; i++)
+            arrEquivalent[i - 1] = Integer.toString(equivalentClass[i]).charAt(0);
+        String strEquivalent = new String(arrEquivalent);
+        Assert.assertNotNull("Equivalent class was null",
+                equivalentClass);
+        Assert.assertEquals("Wrong number of equivalent classes",
+                3, equivalentClass[0]);
+        Assert.assertEquals("Wrong class assignment","12321",strEquivalent);
+    }
+
 
 	@Test
 	public void one_four_cyclohexadiene() throws InvalidSmilesException {
