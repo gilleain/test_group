@@ -1,0 +1,17 @@
+No.8-C1.cc1 38  358 173 1   38  true
+No.5-C1.cc1 38  156 3   1   38  true
+No.17-C2.cc1    38  109 5   2   19  true
+No.4-C1.cc1 38  52  1   1   38  true
+No.13-C2.cc1    38  56  2   2   19  true
+No.16-C3v.cc1   38  43  1   6   10  true
+No.15-C2v.cc1   38  87  9   4   13  true
+No.7-C1.cc1 38  36  2   1   38  true
+No.3-C1.cc1 38  42  1   1   38  true
+No.11-C1.cc1    38  32  1   1   38  true
+No.6-C2.cc1 38  38  1   2   19  true
+No.1-C2.cc1 38  26  1   2   19  true
+No.2-D3h.cc1    38  19  1   12  5   true
+No.12-C2v.cc1   38  36  3   4   12  true
+No.14-C1.cc1    38  37  1   1   38  true
+No.10-C2.cc1    38  38  1   2   19  true
+No.9-D3.cc1 38  27  1   6   7   true

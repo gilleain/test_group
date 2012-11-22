@@ -1,0 +1,15 @@
+No.4-Cs.cc1 36  287 164 2   21  true
+No.9-C2v.cc1    36  104 3   4   11  true
+No.14-D2d.cc1   36  66  1   8   5   true
+No.2-D2.cc1 36  44  1   4   9   true
+No.15-D6h.cc1   36  39  1   24  3   true
+No.5-D2.cc1 36  51  1   4   9   true
+No.3-C1.cc1 36  39  1   1   36  true
+No.6-D2d.cc1    36  28  1   8   6   true
+No.10-C2.cc1    36  90  2   2   18  true
+No.8-Cs.cc1 36  30  2   2   20  true
+No.1-C2.cc1 36  33  10  2   18  true
+No.7-C1.cc1 36  34  1   1   36  true
+No.11-C2.cc1    36  30  1   2   18  true
+No.12-C2.cc1    36  31  1   2   18  true
+No.13-D3h.cc1   36  25  1   12  4   true

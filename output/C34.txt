@@ -1,0 +1,6 @@
+No.2-Cs.cc1 34  356 172 2   20  true
+No.5-C2.cc1 34  80  2   2   17  true
+No.6-C3v.cc1    34  57  1   6   8   true
+No.1-C2.cc1 34  150 1   2   17  true
+No.4-C2.cc1 34  55  2   2   17  true
+No.3-Cs.cc1 34  44  2   2   20  true

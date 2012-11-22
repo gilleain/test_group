@@ -1,0 +1,6 @@
+No.2-D2.cc1 32  263 180 4   8   true
+No.4-C2.cc1 32  96  21  2   16  true
+No.6-D3.cc1 32  26  2   6   6   true
+No.5-D3h.cc1    32  65  1   12  5   true
+No.1-C2.cc1 32  64  1   2   16  true
+No.3-D3d.cc1    32  15  0   12  4   true

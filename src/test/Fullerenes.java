@@ -90,6 +90,7 @@ public class Fullerenes {
 						   + "\t" + elapsedRef
 						   + "\t" + elapsedHuXu
 						   + "\t" + order
+						   + "\t" + refinedPartition.size()
 						   + "\t" + partitionsEqual
 						   );
 	}

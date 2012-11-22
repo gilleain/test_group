@@ -1,0 +1,8 @@
+c30-3.cc1   30  244 166 4   10  true
+c28td.cc1   28  80  1   24  3   true
+c26d3h.cc1  26  51  3   12  4   true
+c30-1.cc1   30  42  1   20  3   true
+c28d2.cc1   28  26  1   4   7   true
+c24d6d.cc1  24  32  1   24  2   true
+c20ih.cc1   20  7   1   120 1   true
+c30-2.cc1   30  32  1   4   9   true
