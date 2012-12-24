@@ -1,4 +1,4 @@
-package test;
+package test.group;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -16,6 +16,8 @@ import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.io.iterator.IIteratingChemObjectReader;
 import org.openscience.cdk.io.iterator.IteratingSDFReader;
 import org.openscience.cdk.io.iterator.IteratingSMILESReader;
+
+import util.ArrayToPartition;
 
 public class FromFileTests {
 	

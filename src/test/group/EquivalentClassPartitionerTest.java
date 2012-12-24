@@ -1,18 +1,45 @@
-package test;
+package test.group;
 
 import java.util.Arrays;
 
+import junit.framework.Assert;
+
 import org.junit.Test;
 import org.openscience.cdk.DefaultChemObjectBuilder;
+import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.NoSuchAtomException;
 import org.openscience.cdk.graph.invariant.EquivalentClassPartitioner;
 import org.openscience.cdk.group.AtomContainerPrinter;
+import org.openscience.cdk.group.Partition;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
+import org.openscience.cdk.templates.MoleculeFactory;
+import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
+
+import util.ArrayToPartition;
 
 public class EquivalentClassPartitionerTest {
 	
 	public final static IChemObjectBuilder builder = DefaultChemObjectBuilder.getInstance();
+	
+	@Test
+	public void testQuinone() throws Exception {
+
+		IAtomContainer mol = MoleculeFactory.makeQuinone();
+		Assert.assertNotNull("Created molecule was null", mol);
+
+		AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(mol);
+		CDKHueckelAromaticityDetector.detectAromaticity(mol);
+		
+		EquivalentClassPartitioner partitioner = new EquivalentClassPartitioner(mol);
+		int[] eqCl = partitioner.getTopoEquivClassbyHuXu(mol);
+		Partition autP = ArrayToPartition.convert(eqCl, 1);
+		
+		Assert.assertEquals(
+				"Wrong number of equivalent classes", 3, autP.size());
+		Partition expected = Partition.fromString("0,7|1,4|2,3,5,6");
+		Assert.assertEquals("Wrong class assignment", expected, autP);
+	}
 	
 	@Test
 	public void one_four_cyclohexadiene() throws NoSuchAtomException {

@@ -1,4 +1,4 @@
-package test;
+package test.group;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -19,10 +19,31 @@ import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.templates.MoleculeFactory;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
+import util.ArrayToPartition;
+
 public class AtomTests {
 	
 	public final static IChemObjectBuilder builder = DefaultChemObjectBuilder.getInstance(); 
 
+	@Test
+	public void testQuinone() throws Exception {
+
+		IAtomContainer mol = MoleculeFactory.makeQuinone();
+		Assert.assertNotNull("Created molecule was null", mol);
+
+//		AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(mol);
+//		CDKHueckelAromaticityDetector.detectAromaticity(mol);
+		
+		AtomDiscretePartitionRefiner refiner = new AtomDiscretePartitionRefiner();
+		refiner.refine(mol);
+		Partition autP = refiner.getAutomorphismPartition();
+		
+		Assert.assertEquals(
+				"Wrong number of equivalent classes", 3, autP.size());
+		Partition expected = Partition.fromString("0,7|1,4|2,3,5,6");
+		Assert.assertEquals("Wrong class assignment", expected, autP);
+	}
+	
 	@Test
 	public void testAromaticSystem() throws Exception {
 

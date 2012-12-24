@@ -1,4 +1,4 @@
-package test;
+package test.group;
 
 import org.junit.Test;
 import org.openscience.cdk.DefaultChemObjectBuilder;

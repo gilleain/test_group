@@ -1,4 +1,6 @@
-package test;
+package test.group;
+
+import io.Chem3DCartesian1Reader;
 
 import java.io.File;
 import java.io.FileReader;
@@ -17,6 +19,8 @@ import org.openscience.cdk.group.Partition;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.silent.AtomContainer;
+
+import util.ArrayToPartition;
 
 public class Fullerenes {
 	
