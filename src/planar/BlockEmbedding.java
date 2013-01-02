@@ -62,7 +62,15 @@ public class BlockEmbedding {
         externalFace = embedCircuit(circuit);
         faces.add(externalFace);
     }
-
+    
+    public void setFaces(List<Face> faces) {
+        this.faces = faces;
+    }
+    
+    public void setExternalFace(Face face) {
+        this.externalFace = face;
+    }
+ 
     public void addDualEdge(Face faceA, Face faceB) {
         dualEdges.add(new DualEdge(faceA, faceB));
     }

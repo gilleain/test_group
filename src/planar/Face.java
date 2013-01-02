@@ -216,17 +216,6 @@ public class Face extends GraphObject {
         return null;
     }
 
-    public int indexOf(Vertex v) {
-        int index = 0;
-        for (Vertex w : vertices) {
-            if (w.equals(v)) {
-                return index;
-            }
-            index++;
-        }
-        return -1;
-    }
-
     public List<Edge> getConnectedEdges(Edge other) {
         List<Edge> connected = new ArrayList<Edge>();
         for (Edge edge : edges) {

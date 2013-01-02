@@ -14,7 +14,7 @@ import planar.Vertex;
  * @author maclean
  *
  */
-public class RadialTreeLayout implements SimpleLayout {
+public class RadialTreeLayout extends BaseCircularLayout implements SimpleLayout {
     
     private ParameterSet params;
     
@@ -76,6 +76,7 @@ public class RadialTreeLayout implements SimpleLayout {
         }
 //        System.out.println("start angle " + Math.round(Math.toDegrees(currentAngle)) +
 //                           " add angle " + Math.round(Math.toDegrees(addAngle)));
+        double edgeLen = params.get("edgeLength");
         for (int neighbour : neighbours) {
             currentAngle += addAngle;
             if (currentAngle >= 2 * Math.PI) {
@@ -83,21 +84,11 @@ public class RadialTreeLayout implements SimpleLayout {
             }
 //            System.out.println("current angle " + Math.round(Math.toDegrees(currentAngle)) + 
 //                               " for " + neighbour);
-            Point2D nextPoint = makeNextPoint(ppV, currentAngle);
+            Point2D nextPoint = makeNextPoint(ppV, currentAngle, edgeLen);
             representation.addLine(new Edge(pV, new Vertex(neighbour)), 
                                    new Line2D.Double(ppV, nextPoint));
             layout(tree, neighbour, index, nextPoint, representation);
         }
-    }
-    
-    private double angle(Point2D ppV, Point2D ppA, Point2D ppB) {
-        double dxA  = ppA.getX() - ppV.getX();
-        double dxB  = ppB.getX() - ppV.getX();
-        double dyA  = ppA.getY() - ppV.getY();
-        double dyB  = ppB.getY() - ppV.getY();
-        double mA   = Math.sqrt((dxA * dxA) + (dyA * dyA));
-        double mB   = Math.sqrt((dxB * dxB) + (dyB * dyB));
-        return Math.acos(((dxA / mA) * (dxB / mB)) + ((dyA / mA) * (dyB / mB)));
     }
 
     private void layout(Layoutable tree, int index, int parentIndex, Point2D point, Representation rep) {
@@ -122,6 +113,7 @@ public class RadialTreeLayout implements SimpleLayout {
         //      System.out.println(String.format("parent %d starting angle %2.0f", 
         //                                        parentIndex, Math.toDegrees(startAngle)));
         double currentAngle = startAngle;
+        double edgeLen = params.get("edgeLength");
         for (int neighbour : neighbours) {
             if (neighbour != parentIndex) {
                 currentAngle += addAngle;
@@ -130,31 +122,14 @@ public class RadialTreeLayout implements SimpleLayout {
                 }
                 //              System.out.println(String.format("%d %d %d %2.0f %2.0f", index, neighbour, n, 
                 //                      Math.toDegrees(currentAngle), Math.toDegrees(addAngle)));
-                Point2D nextPoint = makeNextPoint(point, currentAngle);
+                Point2D nextPoint = makeNextPoint(point, currentAngle, edgeLen);
                 rep.addLine(new Edge(vertex, new Vertex(neighbour)), 
                         new Line2D.Double(point, nextPoint));
                 layout(tree, neighbour, index, nextPoint, rep);
             }
         }
     }
-    
-    private Point2D makeNextPoint(Point2D point, double currentAngle) {
-        double edgeLen = params.get("edgeLength");
-        double x = point.getX() + (edgeLen * Math.cos(currentAngle));
-        double y = point.getY() + (edgeLen * Math.sin(currentAngle));
-        return new Point2D.Double(x, y);
-    }
-    
-    private double angle(Point2D pA, Point2D pB) {
-        double a = Math.atan2((pB.getY() - pA.getY()), 
-                               pB.getX() - pA.getX());
-        if (a < 0) {
-            return 2 * Math.PI + a;
-        } else {
-            return a;
-        }
-    }
-
+   
     private void layoutFromCenterPair(
             Layoutable tree, int centerIndexA, int centerIndexB, Point2D centerPoint, Representation rep) {
         double edgeLen = params.get("edgeLength");

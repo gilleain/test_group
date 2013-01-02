@@ -25,7 +25,7 @@ import planar.Vertex;
  *
  */
 public class Representation {
-	
+    
 	private Map<Vertex, Point2D> points;
 	
 	private Map<Edge, Line2D> lines;

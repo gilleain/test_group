@@ -23,8 +23,7 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.vecmath.Point2d;
 
-import layout.GraphLayout;
-import layout.ParameterSet;
+import layout.ConcentricFaceLayout;
 import layout.Representation;
 
 import org.junit.Test;
@@ -47,8 +46,6 @@ import planar.AtomContainerEmbedding;
 import planar.BlockEmbedding;
 import planar.Face;
 import planar.Vertex;
-import refiner.AnnealingRefiner;
-import refiner.PlestenjakRefiner;
 
 public class Fullerenes {
     
@@ -60,6 +57,10 @@ public class Fullerenes {
     public final int WIDTH = 800;
     
     public final int HEIGHT = 800;
+    
+    public final int RADIUS = 80;
+    
+    public final int EDGE_LEN = 80;
     
     public IAtomContainer readFile(String filepath) throws CDKException, IOException {
         return readFile(new File(DIR, filepath));
@@ -83,17 +84,18 @@ public class Fullerenes {
         }
         System.out.println("ExtFace " + blockEmbedding.getExternalFace());
         System.out.println("InnDual " + blockEmbedding.calculateInnerDual());
-        GraphLayout layout = new GraphLayout(new ParameterSet());
-        return layout.layout(embedding, new Rectangle2D.Double(0, 0, WIDTH, HEIGHT));
+//        GraphLayout layout = new GraphLayout(new ParameterSet());
+//        return layout.layout(embedding, new Rectangle2D.Double(0, 0, WIDTH, HEIGHT));
+        return new ConcentricFaceLayout(RADIUS, EDGE_LEN).layout(blockEmbedding, new Rectangle2D.Double(0, 0, WIDTH, HEIGHT));
     }
     
     public void draw(Representation rep, BlockEmbedding embedding, IAtomContainer ac, int w, int h, String file) throws FileNotFoundException, IOException {
         Rectangle canvas = new Rectangle(0, 0, w, h);
-        Rectangle bigCanvas = new Rectangle(0, 0, w * 10, h * 10);
+//        Rectangle bigCanvas = new Rectangle(0, 0, w * 10, h * 10);
         if (embedding != null) {
 //            rep = new PlestenjakRefiner(canvas).refine(rep, embedding);
 //            rep = new SpringRefiner(100).refine(rep, embedding);
-            rep = new AnnealingRefiner(bigCanvas).refine(rep, embedding);
+//            rep = new AnnealingRefiner(bigCanvas).refine(rep, embedding);
         }
         for (Vertex v : rep.getVertices()) {
             Point2D point = rep.getPoint(v);
@@ -111,6 +113,7 @@ public class Fullerenes {
 //        generators.add(new AtomNumberGenerator());
         AWTFontManager fontManager = new AWTFontManager();
         AtomContainerRenderer renderer = new AtomContainerRenderer(generators, fontManager);
+        tmpPrintCoords(ac);
         renderer.setup(ac, canvas);
         renderer.getRenderer2DModel().set(BasicAtomGenerator.CompactAtom.class, true);
         renderer.getRenderer2DModel().set(BasicAtomGenerator.AtomRadius.class, 2.0);
@@ -119,6 +122,12 @@ public class Fullerenes {
         fontManager.setFontForZoom(0.5);
         renderer.paint(ac, new AWTDrawVisitor(graphics), canvas, false);
         ImageIO.write((RenderedImage) image, "PNG", new FileOutputStream(file));
+    }
+    
+    private void tmpPrintCoords(IAtomContainer ac) {
+        for (int i = 0; i < ac.getAtomCount(); i++) {
+            System.out.println(i + "\t" + ac.getAtom(i).getPoint2d());
+        }
     }
     
     public void testFullerene(String path, String name, File outDir) throws CDKException, IOException {
@@ -132,9 +141,11 @@ public class Fullerenes {
         }
         System.out.println("ExtFace " + blockEmbedding.getExternalFace());
         System.out.println("InnDual " + blockEmbedding.calculateInnerDual());
-        GraphLayout layout = new GraphLayout(new ParameterSet());
-        Rectangle2D canvas = new Rectangle2D.Double(0, 0, WIDTH, HEIGHT);
-        Representation rep = layout.layout(embedding, canvas); 
+//        GraphLayout layout = new GraphLayout(new ParameterSet());
+//        Rectangle2D canvas = new Rectangle2D.Double(0, 0, WIDTH, HEIGHT);
+//        Representation rep = layout.layout(embedding, canvas);
+        Representation rep = new ConcentricFaceLayout(RADIUS, EDGE_LEN).layout(
+                blockEmbedding, new Rectangle2D.Double(0, 0, WIDTH, HEIGHT));
         draw(rep, blockEmbedding, atomContainer, WIDTH, HEIGHT, new File(outDir, name + ".png").toString());
     }
     
@@ -147,7 +158,11 @@ public class Fullerenes {
         List<String> filenames = Arrays.asList(dirFile.list());
         Collections.shuffle(filenames);
         for (String filename : filenames) {
-            testFullerene(dirName, filename.substring(0, filename.length() - 4), outDir);
+            try {
+                testFullerene(dirName, filename.substring(0, filename.length() - 4), outDir);
+            } catch (Exception e) {
+                System.out.println("FAIL ON " + filename);
+            }
         }
     }
     
@@ -164,6 +179,26 @@ public class Fullerenes {
     @Test
     public void testSmallest() throws CDKException, IOException {
         testFullerene("C20-30", "c20ih", new File("output", "C20-30"));
+    }
+    
+    @Test
+    public void testc28d2() throws CDKException, IOException {
+        testFullerene("C20-30", "c28d2", new File("output", "C20-30"));
+    }
+    
+    @Test
+    public void testc30_1() throws CDKException, IOException {
+        testFullerene("C20-30", "c30-1", new File("output", "C20-30"));
+    }
+    
+    @Test
+    public void testNo2_Cs() throws CDKException, IOException {
+        testFullerene("C34", "No.2-Cs", new File("output", "C34"));
+    }
+    
+    @Test
+    public void testNo4_C2() throws CDKException, IOException {
+        testFullerene("C34", "No.4-C2", new File("output", "C34"));
     }
     
     @Test

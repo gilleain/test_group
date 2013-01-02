@@ -114,6 +114,17 @@ public class GraphObject implements Iterable<Vertex>, Layoutable {
         }
         return -1;
     }
+    
+    public int indexOf(Edge e) {
+        int index = 0;
+        for (Edge o : edges) {
+            if (e.equals(o)) {
+                return index;
+            }
+            index++;
+        }
+        return -1;
+    }
 
     public void add(Vertex v) {
         if (vertices.contains(v)) {

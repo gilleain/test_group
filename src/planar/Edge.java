@@ -54,4 +54,10 @@ public class Edge {
         return o.equals(a) || o.equals(b);
     }
 
+    public Vertex getSharedVertex(Edge o) {
+        if (a.equals(o.a) || a.equals(o.b)) return a;
+        if (b.equals(o.b) || b.equals(o.a)) return b;
+        return null;
+    }
+
 }

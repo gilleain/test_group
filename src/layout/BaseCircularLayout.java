@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.vecmath.Point2d;
+
 import planar.Vertex;
 
 public class BaseCircularLayout {
@@ -58,6 +60,42 @@ public class BaseCircularLayout {
         }
     }
     
+    public Point2D makeNextPoint(Point2D point, double currentAngle, double edgeLen) {
+        double x = point.getX() + (edgeLen * Math.cos(currentAngle));
+        double y = point.getY() + (edgeLen * Math.sin(currentAngle));
+        return new Point2D.Double(x, y);
+    }
+    
+    public double angle(Point2D ppV, Point2D ppA, Point2D ppB) {
+        double dxA  = ppA.getX() - ppV.getX();
+        double dxB  = ppB.getX() - ppV.getX();
+        double dyA  = ppA.getY() - ppV.getY();
+        double dyB  = ppB.getY() - ppV.getY();
+        double mA   = Math.sqrt((dxA * dxA) + (dyA * dyA));
+        double mB   = Math.sqrt((dxB * dxB) + (dyB * dyB));
+        return Math.acos(((dxA / mA) * (dxB / mB)) + ((dyA / mA) * (dyB / mB)));
+    }
+    
+    public Point2D getOpposingPoint(Point2D pV, Point2D pA, Point2D pB, double l) {
+        double dX = (pA.getX() - pV.getX()) + (pB.getX() - pV.getX());
+        double dY = (pA.getY() - pV.getY()) + (pB.getY() - pV.getY());
+        double m = Math.sqrt((dX * dX) + (dY * dY));
+        double x = pV.getX() + (l * (-dX / m));
+        double y = pV.getY() + (l * (-dY / m));
+        
+        return new Point2D.Double(x, y);
+    }
+    
+    public Point2D getOpposingPoint(Point2D pV, Point2D pA, double l) {
+        double dX = (pV.getX() - pA.getX());
+        double dY = (pV.getY() - pA.getY());
+        double m = Math.sqrt((dX * dX) + (dY * dY));
+        double x = pV.getX() + (l * (-dX / m));
+        double y = pV.getY() + (l * (-dY / m));
+        
+        return new Point2D.Double(x, y);
+    }
+
     public double angle(Point2D pA, Point2D pB) {
         double a = Math.atan2((pB.getY() - pA.getY()), pB.getX() - pA.getX());
         if (a < 0) {
@@ -65,6 +103,24 @@ public class BaseCircularLayout {
         } else {
             return a;
         }
+    }
+    
+    /**
+     * Check whether point c is left or right of the line segment ab.
+     * 
+     * @param a
+     * @param b
+     * @param c
+     * @return
+     */
+    public boolean isLeft(Point2D a, Point2D b, Point2D c) {
+        double ax = a.getX();
+        double ay = a.getY();
+        double bx = b.getX();
+        double by = b.getY();
+        double cx = c.getX();
+        double cy = c.getY();
+        return ((bx - ax) * (cy - ay)) - ((by - ay) * (cx - ax)) > 0;
     }
     
     public Point2D getNextCenter(Point2D fromCenter, Point2D pA, Point2D pB) {
