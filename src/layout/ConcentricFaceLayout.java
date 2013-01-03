@@ -295,38 +295,105 @@ public class ConcentricFaceLayout extends BaseCircularLayout implements Layout {
             }
             outerPath = face.getEdges();
         } else if (core.size() == 2) {  // pair-core
-            Face faceA = faces.get(core.get(0));
-            Face faceB = faces.get(core.get(1));
-            Edge sharedEdge = faceA.getSharedEdge(faceB);
-            outerPath = new ArrayList<Edge>();
-            double cx = center.getX();
-            double cy = center.getY();
-            double pAx = cx - r;
-            double pBx = cx + r;
-            circularLayout(faceA, faceA.vsize(), pAx, cy, r, null, null, rep);
-            circularLayout(faceB, faceB.vsize(), pBx, cy, r, null, null, rep);
-            int edgeIndexA = 0;
-            int edgeIndexB = 0;
-            List<Edge> edgesA = faceA.getEdges();
-            List<Edge> edgesB = faceB.getEdges();
-            boolean inA = true;
-            for (int counter = 0; counter < faceA.esize() + faceB.esize() - 2; counter++) {
-                Edge currentEdge;
-                if (inA) {
-                    currentEdge = edgesA.get(edgeIndexA);
-                } else {
-                    currentEdge = edgesB.get(edgeIndexB);
-                }
-                if (currentEdge.equals(sharedEdge)) {
-                    inA = !inA;
-                    counter--;
-                    
-                }
-                
-            }
+            outerPath = layoutDualCore(core, faces, center, rep);
+            System.out.println("Laid out dual core, OP = " + outerPath);
         } else {
             // TODO
         }
+        return outerPath;
+    }
+    
+    private List<Edge> layoutDualCore(
+            List<Integer> core, List<Face> faces, Point2D center, Representation rep) {
+        Face faceA = faces.get(core.get(0));
+        Face faceB = faces.get(core.get(1));
+        System.out.println("Dual core; face A = " + faceA + " faceB = " + faceB);
+        List<Edge> edgesA = faceA.getEdges();
+        List<Edge> edgesB = faceB.getEdges();
+        
+        Edge sharedEdge = faceA.getSharedEdge(faceB);
+        List<Edge> outerPath = new ArrayList<Edge>();
+        double cx = center.getX();
+        double cy = center.getY();
+        double pAx = cx - r;
+        circularLayout(faceA, faceA.vsize(), pAx, cy, r, null, null, rep);
+        
+        // add the edges of face A to the outer path
+        int sharedEdgeIndexA = edgesA.indexOf(sharedEdge);
+        int edgeIndexA = (sharedEdgeIndexA < edgesA.size() - 1)? sharedEdgeIndexA + 1 : 0;
+        for (int counter = 0; counter < edgesA.size() - 1; counter++) {
+            outerPath.add(edgesA.get(edgeIndexA));
+            if (edgeIndexA < edgesA.size() - 1) {
+                edgeIndexA++;
+            } else {
+                edgeIndexA = 0;
+            }
+        }
+        
+        int sharedEdgeIndexB = edgesB.indexOf(sharedEdge);
+        int prevIndexB = (sharedEdgeIndexB == 0)? edgesB.size() - 1 : sharedEdgeIndexB - 1;
+        Edge prevInB = edgesB.get(prevIndexB);
+        int nextIndexB = (sharedEdgeIndexB == edgesB.size() - 1)? 0 : sharedEdgeIndexB + 1;
+        boolean forwards;
+        int currentIndex;
+        if (prevInB.adjacent(outerPath.get(outerPath.size() - 1))) {
+            forwards = false;
+            currentIndex = prevIndexB;
+        } else {
+            forwards = true;
+            currentIndex = nextIndexB;
+        }
+        
+        // now go through face, laying out as if an arc, putting edges in OP as we go
+        Edge currentEdge = edgesB.get(currentIndex);
+        Vertex prev = sharedEdge.getSharedVertex(currentEdge);
+        
+        Point2D pA = rep.getPoint(prev);
+        Point2D pB = rep.getPoint(sharedEdge.other(prev));
+        Point2D centerB = getNextCenter(new Point2D.Double(pAx, cy), pA, pB);
+        System.out.println("center A " + pAx + ", " + cy + " centerB " + f(centerB));
+        double angle = angle(centerB, pA);
+        
+        boolean isLeft = super.isLeft(pB, pA, centerB);
+        
+        double addAngle = Math.toRadians(360.0 / faceB.vsize());
+        double currentAngle = angle;
+        for (int counter = 0; counter < faceB.vsize() - 2; counter++) {
+            currentEdge = edgesB.get(currentIndex);
+            outerPath.add(currentEdge);
+            Vertex currentVertex = currentEdge.other(prev);
+            if (isLeft) {
+                currentAngle += addAngle;
+                if (currentAngle >= 2 * Math.PI) {
+                    currentAngle -= 2 * Math.PI;
+                }
+            } else {
+                currentAngle -= addAngle;
+                if (currentAngle <= 0) {
+                    currentAngle += 2 * Math.PI;
+                }
+            }
+            Point2D nextP = makeNextPoint(centerB, currentAngle, edgeLen);
+            rep.addPoint(currentVertex, nextP);
+            System.out.println("setting " + currentVertex + " to " + nextP);
+            prev = currentVertex;
+            if (forwards) {
+                if (currentIndex < edgesB.size() - 1) {
+                    currentIndex++;
+                } else {
+                    currentIndex = 0;
+                }
+            } else {
+                if (currentIndex == 0) {
+                    currentIndex = edgesB.size() - 1;
+                } else {
+                    currentIndex--;
+                }
+            }
+        }
+        
+        outerPath.add(edgesB.get(currentIndex));
+        
         return outerPath;
     }
     

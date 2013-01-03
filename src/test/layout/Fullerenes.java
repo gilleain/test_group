@@ -33,6 +33,7 @@ import org.openscience.cdk.group.AtomContainerPrinter;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.renderer.AtomContainerRenderer;
+import org.openscience.cdk.renderer.color.IAtomColorer;
 import org.openscience.cdk.renderer.font.AWTFontManager;
 import org.openscience.cdk.renderer.generators.BasicAtomGenerator;
 import org.openscience.cdk.renderer.generators.BasicBondGenerator;
@@ -46,6 +47,8 @@ import planar.AtomContainerEmbedding;
 import planar.BlockEmbedding;
 import planar.Face;
 import planar.Vertex;
+import util.MyAtomNumberGenerator;
+import util.SignatureAtomColorer;
 
 public class Fullerenes {
     
@@ -89,7 +92,9 @@ public class Fullerenes {
         return new ConcentricFaceLayout(RADIUS, EDGE_LEN).layout(blockEmbedding, new Rectangle2D.Double(0, 0, WIDTH, HEIGHT));
     }
     
-    public void draw(Representation rep, BlockEmbedding embedding, IAtomContainer ac, int w, int h, String file) throws FileNotFoundException, IOException {
+    public void draw(Representation rep, BlockEmbedding embedding, 
+                     IAtomContainer ac, int w, int h,
+                     String file, boolean numberAtoms) throws FileNotFoundException, IOException {
         Rectangle canvas = new Rectangle(0, 0, w, h);
 //        Rectangle bigCanvas = new Rectangle(0, 0, w * 10, h * 10);
         if (embedding != null) {
@@ -110,7 +115,9 @@ public class Fullerenes {
         generators.add(new BasicSceneGenerator());
         generators.add(new BasicBondGenerator());
         generators.add(new BasicAtomGenerator());
-//        generators.add(new AtomNumberGenerator());
+        if (numberAtoms) {
+            generators.add(new MyAtomNumberGenerator());
+        }
         AWTFontManager fontManager = new AWTFontManager();
         AtomContainerRenderer renderer = new AtomContainerRenderer(generators, fontManager);
         tmpPrintCoords(ac);
@@ -119,6 +126,11 @@ public class Fullerenes {
         renderer.getRenderer2DModel().set(BasicAtomGenerator.AtomRadius.class, 2.0);
         renderer.getRenderer2DModel().set(BasicAtomGenerator.CompactShape.class, BasicAtomGenerator.Shape.OVAL);
         renderer.getRenderer2DModel().set(BasicAtomGenerator.KekuleStructure.class, true);
+        if (numberAtoms) {
+            renderer.getRenderer2DModel().set(MyAtomNumberGenerator.AtomNumberStartCount.class, 0);
+        }
+        IAtomColorer colorer = new SignatureAtomColorer(ac);
+        renderer.getRenderer2DModel().set(BasicAtomGenerator.AtomColorer.class, colorer);
         fontManager.setFontForZoom(0.5);
         renderer.paint(ac, new AWTDrawVisitor(graphics), canvas, false);
         ImageIO.write((RenderedImage) image, "PNG", new FileOutputStream(file));
@@ -131,6 +143,10 @@ public class Fullerenes {
     }
     
     public void testFullerene(String path, String name, File outDir) throws CDKException, IOException {
+        testFullerene(path, name, outDir, false);
+    }
+    
+    public void testFullerene(String path, String name, File outDir, boolean numberAtoms) throws CDKException, IOException {
         IAtomContainer atomContainer = readFile(new File(new File(DIR, path), name + ".cc1"));
         AtomContainerEmbedding embedding = AtomContainerEmbedder.embed(atomContainer);
         BlockEmbedding blockEmbedding = embedding.getBlockEmbedding(0);
@@ -146,7 +162,7 @@ public class Fullerenes {
 //        Representation rep = layout.layout(embedding, canvas);
         Representation rep = new ConcentricFaceLayout(RADIUS, EDGE_LEN).layout(
                 blockEmbedding, new Rectangle2D.Double(0, 0, WIDTH, HEIGHT));
-        draw(rep, blockEmbedding, atomContainer, WIDTH, HEIGHT, new File(outDir, name + ".png").toString());
+        draw(rep, blockEmbedding, atomContainer, WIDTH, HEIGHT, new File(outDir, name + ".png").toString(), numberAtoms);
     }
     
     public void layoutDir(String dirName) throws CDKException, IOException {
@@ -202,6 +218,12 @@ public class Fullerenes {
     }
     
     @Test
+    public void test_c24d6d() throws CDKException, IOException {
+//        testFullerene("C20-30", "c24d6d", new File("output", "C20-30"), true);
+        testFullerene("C20-30", "c24d6d", new File("output", "C20-30"));
+    }
+    
+    @Test
     public void testC20_30() throws CDKException, IOException {
         layoutDir("C20-30");
     }
@@ -228,6 +250,6 @@ public class Fullerenes {
                      + "6:9(1),7:9(1),8:9(1)";
         IAtomContainer atomContainer = AtomContainerPrinter.fromString(cage, builder);
         Representation rep = layout(atomContainer);
-        draw(rep, null, atomContainer, WIDTH, HEIGHT, "cage.png");
+        draw(rep, null, atomContainer, WIDTH, HEIGHT, "cage.png", true);
     }
 }

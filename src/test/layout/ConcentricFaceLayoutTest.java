@@ -109,7 +109,7 @@ public class ConcentricFaceLayoutTest {
         embedding.setFaces(faces);
         embedding.setExternalFace(makeFace(4, 6, 7, 5, 9, 8));
         
-        ConcentricFaceLayout layout = new ConcentricFaceLayout(50, 40);
+        ConcentricFaceLayout layout = new ConcentricFaceLayout(50, 50);
         Representation rep = layout.layout(embedding, new Rectangle2D.Double(0, 0, 500, 500));
         draw(rep, true, embedding, atomContainer, 500, 500, "output/test/cycle/dubs.png");
     }
