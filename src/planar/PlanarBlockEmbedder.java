@@ -1,6 +1,7 @@
 package planar;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -38,28 +39,22 @@ public class PlanarBlockEmbedder {
     public static BlockEmbedding embed(Block blockToEmbed, IAtomContainer atomContainer) {
 //         System.out.println("embedding block");
         // find a circuit of G
-        List<Block> cycles = CycleFinder.findAll(blockToEmbed);
+//        List<Block> cycles = CycleFinder.findAll(blockToEmbed);
+//        
+//        cycles = CycleFinder.getSortedConnectedSimpleCycles(cycles);
         
-        cycles = CycleFinder.getSortedConnectedSimpleCycles(cycles);
-        // for (Block cycle : cycles) { System.out.println(cycle); }
-        int cycleIndex = 0;
-        Block circuit = cycles.get(cycleIndex);
-        BlockEmbedding embedding = null;
         // XXX this is not a great idea. We are trying all cycles here to embed
         // in, until we find one that works. If we allowed embedding of paths in
         // the the outer face, this would not be necessary...
-        int numberOfCycles = cycles.size();
-        while (embedding == null) {
-//            System.out.println("trying " + circuit);
-            embedding = embedInCycle(circuit, blockToEmbed, atomContainer);
-            cycleIndex++;
-            if (cycleIndex == numberOfCycles) {
-                break;
-            } else {
-                circuit = cycles.get(cycleIndex);
+        Iterator<Block> cycleStream = CycleFinder.getCycleStream(blockToEmbed, true); 
+        while (cycleStream.hasNext()) {
+            Block cycle = cycleStream.next();
+            BlockEmbedding embedding = embedInCycle(cycle, blockToEmbed, atomContainer);
+            if (embedding != null) {
+                return embedding;
             }
         }
-        return embedding;
+        return null;
     }
 
     /**

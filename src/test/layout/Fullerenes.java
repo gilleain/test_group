@@ -48,6 +48,7 @@ import planar.BlockEmbedding;
 import planar.Face;
 import planar.Vertex;
 import util.MyAtomNumberGenerator;
+import util.RingPlateGenerator;
 import util.SignatureAtomColorer;
 
 public class Fullerenes {
@@ -115,6 +116,7 @@ public class Fullerenes {
         generators.add(new BasicSceneGenerator());
         generators.add(new BasicBondGenerator());
         generators.add(new BasicAtomGenerator());
+        generators.add(new RingPlateGenerator());
         if (numberAtoms) {
             generators.add(new MyAtomNumberGenerator());
         }
@@ -129,8 +131,8 @@ public class Fullerenes {
         if (numberAtoms) {
             renderer.getRenderer2DModel().set(MyAtomNumberGenerator.AtomNumberStartCount.class, 0);
         }
-        IAtomColorer colorer = new SignatureAtomColorer(ac);
-        renderer.getRenderer2DModel().set(BasicAtomGenerator.AtomColorer.class, colorer);
+//        IAtomColorer colorer = new SignatureAtomColorer(ac);
+//        renderer.getRenderer2DModel().set(BasicAtomGenerator.AtomColorer.class, colorer);
         fontManager.setFontForZoom(0.5);
         renderer.paint(ac, new AWTDrawVisitor(graphics), canvas, false);
         ImageIO.write((RenderedImage) image, "PNG", new FileOutputStream(file));
@@ -241,6 +243,31 @@ public class Fullerenes {
     @Test
     public void testC36() throws CDKException, IOException {
         layoutDir("C36");
+    }
+    
+    @Test
+    public void testC38() throws CDKException, IOException {
+        layoutDir("C38");
+    }
+    
+    @Test
+    public void testC40() throws CDKException, IOException {
+        layoutDir("C40");
+    }
+    
+    @Test
+    public void testC46() throws CDKException, IOException {
+        layoutDir("C46");
+    }
+    
+    @Test
+    public void testC50() throws CDKException, IOException {
+        layoutDir("C50");
+    }
+    
+    @Test
+    public void testC60_76() throws CDKException, IOException {
+        layoutDir("C60-76");
     }
     
     @Test

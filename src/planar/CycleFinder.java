@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import planar.visitor.ConnectedComponentFinder;
@@ -17,6 +18,49 @@ import combinatorics.SubsetLister;
  * 
  */
 public class CycleFinder {
+    
+    public static Iterator<Block> getCycleStream(final Block block, final boolean checkConnected) {
+        List<Block> basis = getCycleBasis(new SpanningTree(block));
+        List<BitSet> baseSets = new ArrayList<BitSet>();
+        for (Block cycle : basis) {
+            BitSet bitSet = cycleToBitSet(cycle, block);
+            baseSets.add(bitSet);
+        }
+        SubsetLister<BitSet> lister = new SubsetLister<BitSet>(baseSets);
+        final Iterator<List<BitSet>> bitSetIterator = lister.iterator();
+        return new Iterator<Block>() {
+            
+            @Override
+            public boolean hasNext() {
+                return bitSetIterator.hasNext();
+            }
+
+            @Override
+            public Block next() {
+                Block nextCycle = null;
+                nextCycle = getNext();
+                if (checkConnected) {
+                    // not sure that this works, exactly...
+                    while (!isSimpleConnected(nextCycle) 
+                            && bitSetIterator.hasNext()) {
+                        nextCycle = getNext();
+                    }
+                }
+                return nextCycle;
+            }
+            
+            private Block getNext() {
+                List<BitSet> combination = bitSetIterator.next();
+                return CycleFinder.toCycle(combine(combination), block);
+            }
+
+            @Override
+            public void remove() {
+                // do nothing
+            }
+            
+        };
+    }
 
     public static Block getMaxCycle(Block block) {
         // XXX -assumes the graph is a block!
@@ -45,16 +89,23 @@ public class CycleFinder {
         }
         return maxCycle;
     }
+    
+    public static boolean isSimpleConnected(Block cycle) {
+        if (cycle.esize() == cycle.vsize()) {
+            ConnectedComponentFinder finder = new ConnectedComponentFinder();
+            cycle.accept(finder);
+            if (finder.getComponents().size() == 1) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public static List<Block> getSortedConnectedSimpleCycles(List<Block> cycles) {
         List<Block> connectedCycles = new ArrayList<Block>();
         for (Block cycle : cycles) {
-            if (cycle.esize() == cycle.vsize()) {
-                ConnectedComponentFinder finder = new ConnectedComponentFinder();
-                cycle.accept(finder);
-                if (finder.getComponents().size() == 1) {
-                    connectedCycles.add(cycle);
-                }
+            if (isSimpleConnected(cycle)) {
+                connectedCycles.add(cycle);
             }
         }
         Collections.sort(connectedCycles, new Comparator<Block>() {
@@ -65,13 +116,6 @@ public class CycleFinder {
             }
 
         });
-        // for (Block cycle : connectedCycles) {
-        // ConnectedComponentFinder finder = new ConnectedComponentFinder();
-        // cycle.accept(finder);
-        // finder.visit(cycle, cycle.getVertex(0));
-        // System.out.println(finder.getComponents().size()
-        // + "\t" + cycle + "\t" + finder.getComponents());
-        // }
         return connectedCycles;
     }
 
@@ -109,14 +153,6 @@ public class CycleFinder {
         expand(cycleBasis, allCycles, block);
         return allCycles;
     }
-
-    // private static void print(BitSet bitSet, Block cycle, Block graph) {
-    // for (int i = 0; i < graph.esize(); i++) {
-    // System.out.print(bitSet.get(i)? 1 : 0);
-    // }
-    // System.out.print(" " + cycle);
-    // System.out.println();
-    // }
 
     public static void expand(List<Block> basis, List<Block> all, Block graph) {
         List<BitSet> baseSets = new ArrayList<BitSet>();
