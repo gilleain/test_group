@@ -116,7 +116,9 @@ public class Fullerenes {
         generators.add(new BasicSceneGenerator());
         generators.add(new BasicBondGenerator());
         generators.add(new BasicAtomGenerator());
-        generators.add(new RingPlateGenerator());
+        RingPlateGenerator plateGenerator = new RingPlateGenerator();
+        plateGenerator.embedding = embedding;
+        generators.add(plateGenerator);
         if (numberAtoms) {
             generators.add(new MyAtomNumberGenerator());
         }
