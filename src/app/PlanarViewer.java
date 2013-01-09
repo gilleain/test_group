@@ -36,6 +36,7 @@ import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.geometry.GeometryTools;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.renderer.AtomContainerRenderer;
+import org.openscience.cdk.renderer.RendererModel;
 import org.openscience.cdk.renderer.font.AWTFontManager;
 import org.openscience.cdk.renderer.generators.BasicAtomGenerator;
 import org.openscience.cdk.renderer.generators.BasicBondGenerator;
@@ -72,6 +73,12 @@ public class PlanarViewer extends JFrame implements ActionListener, MouseListene
         private BlockEmbedding blockEmbedding;
         
         private Map<Point2d, Face> faceCenterMap;
+        
+        private AWTFontManager fontManager;
+        
+        private AtomContainerRenderer renderer;
+        
+        private RingPlateGenerator plateGenerator;
 
         public DrawPanel() {
             laidOut = false;
@@ -84,32 +91,72 @@ public class PlanarViewer extends JFrame implements ActionListener, MouseListene
             g.fillRect(0, 0, size.width, size.height);
             if (ac != null) {
                 if (!laidOut) {
-                    AtomContainerEmbedding embedding = AtomContainerEmbedder.embed(ac);
-                    blockEmbedding = embedding.getBlockEmbedding(0);
-                    
-                    Representation rep = new ConcentricFaceLayout(RADIUS, EDGE_LEN).layout(
-                            blockEmbedding, new Rectangle2D.Double(0, 0, WIDTH, HEIGHT));
-                    for (Vertex v : rep.getVertices()) {
-                        Point2D point = rep.getPoint(v);
-                        Point2d p2d = new Point2d(point.getX(), point.getY());
-                        ac.getAtom(v.getIndex()).setPoint2d(p2d);
-                    }
-                    GeometryTools.center(ac, size);
-                    for (Face face : blockEmbedding.getFaces()) {
-                        Point2d center = new Point2d();
-                        for (Vertex v : face) {
-                            Point2d point = ac.getAtom(v.getIndex()).getPoint2d();
-                            center.x += point.x;
-                            center.y += point.y;
-                        }
-                        center.x /= face.vsize();
-                        center.y /= face.vsize();
-                        faceCenterMap.put(center, face);
-                    }
-                    laidOut = true;
+                   layout(size);
+                   setupRenderer();
                 }
                 draw(size.width, size.height, showNumbers, g);
             }
+        }
+        
+        private void layout(Dimension size) {
+            AtomContainerEmbedding embedding = AtomContainerEmbedder.embed(ac);
+            layout(size, embedding.getBlockEmbedding(0));
+        }
+
+        private void layout(Dimension size, BlockEmbedding embedding) {
+            try {
+                Representation rep = new ConcentricFaceLayout(RADIUS, EDGE_LEN).layout(
+                    embedding, new Rectangle2D.Double(0, 0, WIDTH, HEIGHT));
+                for (Vertex v : rep.getVertices()) {
+                    Point2D point = rep.getPoint(v);
+                    Point2d p2d = new Point2d(point.getX(), point.getY());
+                    ac.getAtom(v.getIndex()).setPoint2d(p2d);
+                }
+                GeometryTools.center(ac, size);
+                for (Face face : embedding.getFaces()) {
+                    Point2d center = new Point2d();
+                    for (Vertex v : face) {
+                        Point2d point = ac.getAtom(v.getIndex()).getPoint2d();
+                        center.x += point.x;
+                        center.y += point.y;
+                    }
+                    center.x /= face.vsize();
+                    center.y /= face.vsize();
+                    faceCenterMap.put(center, face);
+                }
+                laidOut = true;
+            } catch (Exception e) {
+                System.out.println(e);
+                return;
+            }
+            blockEmbedding = embedding;
+        }
+        
+        private void reEmbed(Face face) {
+            Face oldExternalFace = blockEmbedding.getExternalFace();
+            List<Face> faces = blockEmbedding.getFaces();
+            faces.remove(face);
+            faces.add(oldExternalFace);
+            
+            BlockEmbedding embedding = new BlockEmbedding(ac);
+            embedding.setExternalFace(face);
+            embedding.setFaces(faces);
+            layout(getSize(), embedding);
+            plateGenerator.embedding = blockEmbedding;
+            repaint();
+        }
+        
+        private void setupRenderer() {
+            List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
+            generators.add(new BasicSceneGenerator());
+            generators.add(new BasicBondGenerator());
+            generators.add(new BasicAtomGenerator());
+            plateGenerator = new RingPlateGenerator();
+            plateGenerator.embedding = blockEmbedding;
+            generators.add(plateGenerator);
+            generators.add(new MyAtomNumberGenerator());
+            fontManager = new AWTFontManager();
+            renderer = new AtomContainerRenderer(generators, fontManager);
         }
         
         public void setAtomContainer(IAtomContainer atomContainer) {
@@ -123,29 +170,19 @@ public class PlanarViewer extends JFrame implements ActionListener, MouseListene
             Graphics2D graphics = (Graphics2D) g;
             graphics.setColor(Color.WHITE);
             graphics.fill(canvas);
-            List<IGenerator<IAtomContainer>> generators = new ArrayList<IGenerator<IAtomContainer>>();
-            generators.add(new BasicSceneGenerator());
-            generators.add(new BasicBondGenerator());
-            generators.add(new BasicAtomGenerator());
-            RingPlateGenerator plateGenerator = new RingPlateGenerator();
-            plateGenerator.embedding = blockEmbedding;
-            generators.add(plateGenerator);
-            if (numberAtoms) {
-                generators.add(new MyAtomNumberGenerator());
-            }
-            AWTFontManager fontManager = new AWTFontManager();
-            AtomContainerRenderer renderer = new AtomContainerRenderer(generators, fontManager);
+            
             renderer.setup(ac, canvas);
-            renderer.getRenderer2DModel().set(BasicAtomGenerator.CompactAtom.class, true);
-            renderer.getRenderer2DModel().set(BasicAtomGenerator.AtomRadius.class, 2.0);
-            renderer.getRenderer2DModel().set(BasicAtomGenerator.CompactShape.class, BasicAtomGenerator.Shape.OVAL);
-            renderer.getRenderer2DModel().set(BasicAtomGenerator.KekuleStructure.class, true);
+            RendererModel model = renderer.getRenderer2DModel(); 
+            model.set(BasicAtomGenerator.CompactAtom.class, true);
+            model.set(BasicAtomGenerator.AtomRadius.class, 2.0);
+            model.set(BasicAtomGenerator.CompactShape.class, BasicAtomGenerator.Shape.OVAL);
+            model.set(BasicAtomGenerator.KekuleStructure.class, true);
             if (numberAtoms) {
-                renderer.getRenderer2DModel().set(MyAtomNumberGenerator.AtomNumberStartCount.class, 0);
+                model.set(MyAtomNumberGenerator.WillDrawAtomNumbers.class, true);
+                model.set(MyAtomNumberGenerator.AtomNumberStartCount.class, 0);
+            } else {
+                model.set(MyAtomNumberGenerator.WillDrawAtomNumbers.class, false);
             }
-            //          IAtomColorer colorer = new SignatureAtomColorer(ac);
-            //          renderer.getRenderer2DModel().set(BasicAtomGenerator.AtomColorer.class, colorer);
-            fontManager.setFontForZoom(0.5);
             renderer.paint(ac, new AWTDrawVisitor(graphics), canvas, false);
         }
         
@@ -162,7 +199,9 @@ public class PlanarViewer extends JFrame implements ActionListener, MouseListene
                     winner = center;
                 }
             }
-            System.out.println(p + "\t" + faceCenterMap.get(winner));
+            Face pickedFace = faceCenterMap.get(winner);
+            System.out.println(p + "\t" + pickedFace);
+            reEmbed(pickedFace);
         }
 
     }

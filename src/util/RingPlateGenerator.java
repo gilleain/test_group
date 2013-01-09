@@ -60,8 +60,8 @@ public class RingPlateGenerator implements IGenerator<IAtomContainer> {
             for (IAtomContainer ring : ringSet.atomContainers()) {
                 Point2d center = GeometryTools.get2DCenter(ring);
                 ringPaths.add(generateRing(ring, center, colors[colorIndex]));
-                ringPaths.add(new TextElement(
-                        center.x, center.y, String.valueOf(colorIndex), Color.BLACK));
+//                ringPaths.add(new TextElement(
+//                        center.x, center.y, String.valueOf(colorIndex), Color.BLACK));
             }
             
             colorIndex++;
