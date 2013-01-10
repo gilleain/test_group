@@ -4,10 +4,9 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.BitSet;
+import java.util.Iterator;
 import java.util.List;
 
-import planar.Block;
 import planar.BlockEmbedding;
 import planar.Edge;
 import planar.Face;
@@ -35,17 +34,18 @@ public class ConcentricFaceLayout extends BaseCircularLayout implements Layout {
             BlockEmbedding em, Vertex start, Point2D startPoint, Rectangle2D canvas) {
         Representation rep = new Representation();
         
-        List<List<Integer>> faceLayers = calculateFaceLayers(em);
+        FaceLayerDecomposition decomp = new FaceLayerDecomposition(em);
         List<Face> faces = em.getFaces();
         
         // layout the core as the N-1th layer
-        List<Integer> core = faceLayers.get(faceLayers.size() - 1);
+        List<Integer> core = decomp.getCore();
         Point2D center = new Point2D.Double(canvas.getCenterX(), canvas.getCenterY());
         List<Edge> outerPath = layoutCore(core, faces, center, rep);
         
         // for the rest of the layers, layout spokes and arches
-        for (int faceLayerIndex = faceLayers.size() - 2; faceLayerIndex > -1; faceLayerIndex--) {
-            List<Integer> layer = faceLayers.get(faceLayerIndex);
+        Iterator<List<Integer>> layerIterator = decomp.getInnerLayers();
+        while (layerIterator.hasNext()) {
+            List<Integer> layer = layerIterator.next();
             List<Edge> nextOuterPath = new ArrayList<Edge>();
             for (int faceIndex : layer) {
                 Face face = faces.get(faceIndex);
@@ -66,7 +66,7 @@ public class ConcentricFaceLayout extends BaseCircularLayout implements Layout {
         Edge spokeB = null;
         Edge pathEdgeB1 = null;
         Edge pathEdgeB2 = null;
-        System.out.println("laying out Face " + face + " in " + outerPath);
+//        System.out.println("laying out Face " + face + " in " + outerPath);
         
         int opSize = outerPath.size();
         for (Edge faceEdge : face.getEdges()) {
@@ -99,9 +99,9 @@ public class ConcentricFaceLayout extends BaseCircularLayout implements Layout {
                 }
             }
         }
-        System.out.println("spoke A " + spokeA + " pathA1 " + pathEdgeA1 + " pathA2 " + pathEdgeA2 + " in " + face);
+//        System.out.println("spoke A " + spokeA + " pathA1 " + pathEdgeA1 + " pathA2 " + pathEdgeA2 + " in " + face);
         Vertex archStart = layoutSpoke(spokeA, pathEdgeA1, pathEdgeA2, face, rep);
-        System.out.println("spoke B " + spokeB + " pathB1 " + pathEdgeB1 + " pathB2 " + pathEdgeB2 + " in " + face);
+//        System.out.println("spoke B " + spokeB + " pathB1 " + pathEdgeB1 + " pathB2 " + pathEdgeB2 + " in " + face);
         Vertex archEnd   = layoutSpoke(spokeB, pathEdgeB1, pathEdgeB2, face, rep);
         nextOP.addAll(layoutArch(
                 archStart, spokeA, archEnd, spokeB, face, outerPath, totalCenter, rep));
@@ -114,18 +114,18 @@ public class ConcentricFaceLayout extends BaseCircularLayout implements Layout {
         Point2D pC = rep.getPoint(centerVertex);
         Point2D pP = rep.getPoint(otherVertex);
         Point2D pN = rep.getPoint(edgeA.other(centerVertex));
-        System.out.println("pC " + centerVertex + " = " + f(pC) + 
-                " pP " + otherVertex + " = " + f(pP) + 
-                " pN " + edgeA.other(centerVertex) + " = " + f(pN));
+//        System.out.println("pC " + centerVertex + " = " + f(pC) + 
+//                " pP " + otherVertex + " = " + f(pP) + 
+//                " pN " + edgeA.other(centerVertex) + " = " + f(pN));
         Point2D p = getOpposingPoint(pC, pP, pN, r);
         if (Double.isNaN(p.getX()) || Double.isNaN(p.getY())) {
             Point2D fc = getCenter(face, rep);
-            System.out.println("FACE CENTER = " + fc);
+//            System.out.println("FACE CENTER = " + fc);
             p = getOpposingPoint(pC, fc, r);    // XXX wrong way round?
         }
         Vertex spokeVertex = spoke.other(centerVertex); 
         rep.addPoint(spokeVertex, p);
-        System.out.println("spoke " + spokeVertex + " @ " + f(p));
+//        System.out.println("spoke " + spokeVertex + " @ " + f(p));
         rep.addLine(spoke, new Line2D.Double(pC, p));
         return spokeVertex;
     }
@@ -160,7 +160,7 @@ public class ConcentricFaceLayout extends BaseCircularLayout implements Layout {
                                    Face face, List<Edge> outerPath,
                                    Point2D totalCenter,
                                    Representation rep) {
-        System.out.println("Getting arch of " + face + " from " + archStart + " to " + archEnd);
+//        System.out.println("Getting arch of " + face + " from " + archStart + " to " + archEnd);
         Path arch = new Path();
         List<Edge> edges = face.getEdges();
         
@@ -198,7 +198,7 @@ public class ConcentricFaceLayout extends BaseCircularLayout implements Layout {
                 arch.add(prev);
                 arch.add(next);
                 arch.add(prev, next);
-                System.out.println("prev " + prev + " archEdge " + archEdge);
+//                System.out.println("prev " + prev + " archEdge " + archEdge);
                
                 if (forwards) {
                     if (edgeIndex < edges.size()) {
@@ -217,7 +217,7 @@ public class ConcentricFaceLayout extends BaseCircularLayout implements Layout {
             }
         }
         
-        System.out.println("Laying out arch " + arch);
+//        System.out.println("Laying out arch " + arch);
         Point2D archStartP = rep.getPoint(archStart);
         Point2D archEndP = rep.getPoint(archEnd);
         List<Edge> newOuterPath = new ArrayList<Edge>();
@@ -230,7 +230,7 @@ public class ConcentricFaceLayout extends BaseCircularLayout implements Layout {
             double currentAngle = angle(archCenter, archStartP);
             
             boolean isLeft = super.isLeft(totalCenter, archStartP, archEndP);
-            System.out.println("ISLEFT " + isLeft + " ARCH " + arch);
+//            System.out.println("ISLEFT " + isLeft + " ARCH " + arch);
             
             double addAngle = Math.toRadians(180 / (arch.vsize() - 1));
             Point2D prevPoint = archStartP;
@@ -239,8 +239,8 @@ public class ConcentricFaceLayout extends BaseCircularLayout implements Layout {
     
             int archEdgeIndex = 0;
             int vertexIndex = 1;
-            System.out.println("Arch from " + d(currentAngle) + 
-                               " deg by " + d(addAngle) + " deg , Forwards = " + forwards);
+//            System.out.println("Arch from " + d(currentAngle) + 
+//                               " deg by " + d(addAngle) + " deg , Forwards = " + forwards);
             for (int counter = 1; counter < arch.vsize() - 1; counter++) {
                 Vertex vertex = arch.getVertex(vertexIndex);
                 if (isLeft) {
@@ -256,8 +256,8 @@ public class ConcentricFaceLayout extends BaseCircularLayout implements Layout {
                 }
                 Point2D nextP = makeNextPoint(archCenter, currentAngle, edgeLen);
                 rep.addPoint(vertex, nextP);
-                System.out.println("setting " + vertex + " to " + 
-                                   f(nextP) + " ang = " + d(currentAngle));
+//                System.out.println("setting " + vertex + " to " + 
+//                                   f(nextP) + " ang = " + d(currentAngle));
                 Line2D line = new Line2D.Double(prevPoint, nextP);
                 vertexIndex++;
                 prevPoint = nextP;
@@ -270,8 +270,7 @@ public class ConcentricFaceLayout extends BaseCircularLayout implements Layout {
                 }
             }
         }
-//        System.out.println("Returning outer path " + newOuterPath);
-        System.out.println("Returning outer path " + arch.getEdges());
+//        System.out.println("Returning outer path " + arch.getEdges());
 //        return newOuterPath;
         return arch.getEdges();
     }
@@ -287,6 +286,7 @@ public class ConcentricFaceLayout extends BaseCircularLayout implements Layout {
             List<Integer> core, List<Face> faces, Point2D center, Representation rep) {
         List<Edge> outerPath = null;
         if (core.size() == 1) { // simple cyclic core
+            System.out.println("CORE is singular");
             Face face = faces.get(core.get(0));
             circularLayout(face, face.vsize(), center.getX(), center.getY(), r, null, null, rep);
             for (Edge e : face.getEdges()) {
@@ -295,10 +295,11 @@ public class ConcentricFaceLayout extends BaseCircularLayout implements Layout {
             }
             outerPath = face.getEdges();
         } else if (core.size() == 2) {  // pair-core
+            System.out.println("CORE is dual");
             outerPath = layoutDualCore(core, faces, center, rep);
-            System.out.println("Laid out dual core, OP = " + outerPath);
         } else {
             // TODO
+            System.out.println("CORE is cyclic");
         }
         return outerPath;
     }
@@ -307,7 +308,7 @@ public class ConcentricFaceLayout extends BaseCircularLayout implements Layout {
             List<Integer> core, List<Face> faces, Point2D center, Representation rep) {
         Face faceA = faces.get(core.get(0));
         Face faceB = faces.get(core.get(1));
-        System.out.println("Dual core; face A = " + faceA + " faceB = " + faceB);
+//        System.out.println("Dual core; face A = " + faceA + " faceB = " + faceB);
         List<Edge> edgesA = faceA.getEdges();
         List<Edge> edgesB = faceB.getEdges();
         
@@ -351,7 +352,7 @@ public class ConcentricFaceLayout extends BaseCircularLayout implements Layout {
         Point2D pA = rep.getPoint(prev);
         Point2D pB = rep.getPoint(sharedEdge.other(prev));
         Point2D centerB = getNextCenter(new Point2D.Double(pAx, cy), pA, pB);
-        System.out.println("center A " + pAx + ", " + cy + " centerB " + f(centerB));
+//        System.out.println("center A " + pAx + ", " + cy + " centerB " + f(centerB));
         double angle = angle(centerB, pA);
         
         boolean isLeft = super.isLeft(pB, pA, centerB);
@@ -375,7 +376,7 @@ public class ConcentricFaceLayout extends BaseCircularLayout implements Layout {
             }
             Point2D nextP = makeNextPoint(centerB, currentAngle, edgeLen);
             rep.addPoint(currentVertex, nextP);
-            System.out.println("setting " + currentVertex + " to " + nextP);
+//            System.out.println("setting " + currentVertex + " to " + nextP);
             prev = currentVertex;
             if (forwards) {
                 if (currentIndex < edgesB.size() - 1) {
@@ -396,43 +397,4 @@ public class ConcentricFaceLayout extends BaseCircularLayout implements Layout {
         
         return outerPath;
     }
-    
-    private List<List<Integer>> calculateFaceLayers(BlockEmbedding embedding) {
-        Block dual = embedding.calculateInnerDual();
-        int count = dual.vsize();
-        List<List<Integer>> faceLayers = new ArrayList<List<Integer>>();
-        
-        Face outerFace = embedding.getExternalFace();
-        List<Face> faces = embedding.getFaces();
-        BitSet seen = new BitSet(count);
-        
-        // get the outer edge of faces
-        List<Integer> currentLayer = new ArrayList<Integer>();
-        for (int faceIndex = 0; faceIndex < count; faceIndex++) {
-            Face face = faces.get(faceIndex);
-            if (face.sharesEdge(outerFace)) {
-                currentLayer.add(faceIndex);
-                seen.set(faceIndex);
-            }
-        }
-        faceLayers.add(currentLayer);
-        
-        // go inwards
-        while (seen.cardinality() < count) {
-            List<Integer> nextLayer = new ArrayList<Integer>();
-            for (int faceIndex : currentLayer) {
-                for (int connectedFace : dual.getConnected(faceIndex)) {
-                    if (!seen.get(connectedFace)) {
-                        nextLayer.add(connectedFace);
-                        seen.set(connectedFace);
-                    }
-                }
-            }
-            faceLayers.add(nextLayer);
-            currentLayer = nextLayer;
-        }
-        
-        return faceLayers;
-    }
-
 }

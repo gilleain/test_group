@@ -81,13 +81,13 @@ public class Fullerenes {
     public Representation layout(IAtomContainer atomContainer) {
         AtomContainerEmbedding embedding = AtomContainerEmbedder.embed(atomContainer);
         BlockEmbedding blockEmbedding = embedding.getBlockEmbedding(0);
-        int faceIndex = 0;
-        for (Face face : blockEmbedding.getFaces()) {
-            System.out.println(faceIndex + "\t" + face);
-            faceIndex++;
-        }
-        System.out.println("ExtFace " + blockEmbedding.getExternalFace());
-        System.out.println("InnDual " + blockEmbedding.calculateInnerDual());
+//        int faceIndex = 0;
+//        for (Face face : blockEmbedding.getFaces()) {
+//            System.out.println(faceIndex + "\t" + face);
+//            faceIndex++;
+//        }
+//        System.out.println("ExtFace " + blockEmbedding.getExternalFace());
+//        System.out.println("InnDual " + blockEmbedding.calculateInnerDual());
 //        GraphLayout layout = new GraphLayout(new ParameterSet());
 //        return layout.layout(embedding, new Rectangle2D.Double(0, 0, WIDTH, HEIGHT));
         return new ConcentricFaceLayout(RADIUS, EDGE_LEN).layout(blockEmbedding, new Rectangle2D.Double(0, 0, WIDTH, HEIGHT));
@@ -124,7 +124,7 @@ public class Fullerenes {
         }
         AWTFontManager fontManager = new AWTFontManager();
         AtomContainerRenderer renderer = new AtomContainerRenderer(generators, fontManager);
-        tmpPrintCoords(ac);
+//        tmpPrintCoords(ac);
         renderer.setup(ac, canvas);
         renderer.getRenderer2DModel().set(BasicAtomGenerator.CompactAtom.class, true);
         renderer.getRenderer2DModel().set(BasicAtomGenerator.AtomRadius.class, 2.0);
@@ -154,13 +154,13 @@ public class Fullerenes {
         IAtomContainer atomContainer = readFile(new File(new File(DIR, path), name + ".cc1"));
         AtomContainerEmbedding embedding = AtomContainerEmbedder.embed(atomContainer);
         BlockEmbedding blockEmbedding = embedding.getBlockEmbedding(0);
-        int faceIndex = 0;
-        for (Face face : blockEmbedding.getFaces()) {
-            System.out.println(faceIndex + "\t" + face);
-            faceIndex++;
-        }
-        System.out.println("ExtFace " + blockEmbedding.getExternalFace());
-        System.out.println("InnDual " + blockEmbedding.calculateInnerDual());
+//        int faceIndex = 0;
+//        for (Face face : blockEmbedding.getFaces()) {
+//            System.out.println(faceIndex + "\t" + face);
+//            faceIndex++;
+//        }
+//        System.out.println("ExtFace " + blockEmbedding.getExternalFace());
+//        System.out.println("InnDual " + blockEmbedding.calculateInnerDual());
 //        GraphLayout layout = new GraphLayout(new ParameterSet());
 //        Rectangle2D canvas = new Rectangle2D.Double(0, 0, WIDTH, HEIGHT);
 //        Representation rep = layout.layout(embedding, canvas);
@@ -179,9 +179,11 @@ public class Fullerenes {
         Collections.shuffle(filenames);
         for (String filename : filenames) {
             try {
+                System.out.println("TRYING " + filename);
                 testFullerene(dirName, filename.substring(0, filename.length() - 4), outDir);
+                System.out.println("SUCCEEDED " + filename);
             } catch (Exception e) {
-                System.out.println("FAIL ON " + filename);
+                System.out.println("FAIL ON " + filename + " because " + e.getStackTrace()[0]);
             }
         }
     }
@@ -204,6 +206,11 @@ public class Fullerenes {
     @Test
     public void testc28d2() throws CDKException, IOException {
         testFullerene("C20-30", "c28d2", new File("output", "C20-30"));
+    }
+    
+    @Test
+    public void testc26d3h() throws CDKException, IOException {
+        testFullerene("C20-30", "c26d3h", new File("output", "C20-30"), true);
     }
     
     @Test
@@ -258,6 +265,16 @@ public class Fullerenes {
     }
     
     @Test
+    public void testC42() throws CDKException, IOException {
+        layoutDir("C42");
+    }
+    
+    @Test
+    public void testC44() throws CDKException, IOException {
+        layoutDir("C44");
+    }
+    
+    @Test
     public void testC46() throws CDKException, IOException {
         layoutDir("C46");
     }
@@ -273,12 +290,48 @@ public class Fullerenes {
     }
     
     @Test
+    public void testBucky() throws CDKException, IOException {
+        testFullerene("C60-76", "C60-Ih", new File("."));
+    }
+    
+    @Test
     public void testCage() throws FileNotFoundException, IOException {
         String cage = "C0C1C2C3C4C5C6C7C8C9 0:1(1),0:5(1),0:6(1),1:2(1),1:6(1),"
                      + "2:3(1),2:7(1),3:4(1),3:7(1),4:5(1),4:8(1),5:8(1)," 
                      + "6:9(1),7:9(1),8:9(1)";
         IAtomContainer atomContainer = AtomContainerPrinter.fromString(cage, builder);
-        Representation rep = layout(atomContainer);
-        draw(rep, null, atomContainer, WIDTH, HEIGHT, "cage.png", true);
+        AtomContainerEmbedding embedding = AtomContainerEmbedder.embed(atomContainer);
+        BlockEmbedding blockEmbedding = embedding.getBlockEmbedding(0);
+        int faceIndex = 0;
+        for (Face face : blockEmbedding.getFaces()) {
+            System.out.println(faceIndex + "\t" + face);
+            faceIndex++;
+        }
+        System.out.println("ExtFace " + blockEmbedding.getExternalFace());
+        System.out.println("InnDual " + blockEmbedding.calculateInnerDual());
+        Representation rep = new ConcentricFaceLayout(RADIUS, EDGE_LEN)
+                            .layout(blockEmbedding, new Rectangle2D.Double(0, 0, WIDTH, HEIGHT));
+        draw(rep, blockEmbedding, atomContainer, WIDTH, HEIGHT, "output/test/cycle/cage.png", true);
     }
+    
+    @Test
+    public void testCup() throws FileNotFoundException, IOException {
+        IAtomContainer atomContainer = AtomContainerPrinter.fromString(
+                "C0C1C2C3C4C5C6C7C8C9C0C1 0:1(1),0:3(1),0:4(1)," +
+                "1:2(1),1:5(1),2:3(1),2:6(1),3:7(1),4:8(1),4:11(1)," +
+                "5:8(1),5:9(1),6:9(1),6:10(1),7:10(1),7:11(1)", builder);
+        AtomContainerEmbedding embedding = AtomContainerEmbedder.embed(atomContainer);
+        BlockEmbedding blockEmbedding = embedding.getBlockEmbedding(0);
+        int faceIndex = 0;
+        for (Face face : blockEmbedding.getFaces()) {
+            System.out.println(faceIndex + "\t" + face);
+            faceIndex++;
+        }
+        System.out.println("ExtFace " + blockEmbedding.getExternalFace());
+        System.out.println("InnDual " + blockEmbedding.calculateInnerDual());
+        Representation rep = new ConcentricFaceLayout(RADIUS, EDGE_LEN)
+                            .layout(blockEmbedding, new Rectangle2D.Double(0, 0, WIDTH, HEIGHT));
+        draw(rep, blockEmbedding, atomContainer, WIDTH, HEIGHT, "output/test/cycle/cup.png", true);
+    }
+        
 }

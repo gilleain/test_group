@@ -57,10 +57,16 @@ public class BlockEmbedding {
     public BlockEmbedding(IAtomContainer atomContainer, Block circuit) {
         this(atomContainer);
 
-        // this is wrong : if bridges are embedded in external face, this
-        // changes
+        // this is wrong : if bridges are embedded in external face, this changes
         externalFace = embedCircuit(circuit);
-        faces.add(externalFace);
+        Face face = new Face();
+        for (int edgeIndex = externalFace.esize() - 1; edgeIndex >= 0; edgeIndex--) {
+            Edge e = externalFace.edges.get(edgeIndex);
+            face.add(e.getB());
+            face.add(e.getA());
+            face.add(e.getB(), e.getA());
+        }
+        faces.add(face);
     }
     
     public void setFaces(List<Face> faces) {
@@ -97,7 +103,10 @@ public class BlockEmbedding {
      */
     private Face embedCircuit(Block circuit) {
         Vertex start = circuit.getVertex(0);
-        Face face = new Face(circuit.vertices);
+        Face face = new Face();
+        for (Vertex v : circuit.vertices) {
+            face.add(v);
+        }
         embedCircuit(circuit, null, start, start, face);
         return face;
     }
@@ -175,21 +184,21 @@ public class BlockEmbedding {
 
     public void embedInOuterFace(Path path) {
         Path rev = path.reverse();
-//        Vertex start = rev.getVertex(0);
-//        Vertex end = rev.getVertex(rev.vsize() - 1);
         Vertex start = rev.getVertex(rev.vsize() - 1);
         Vertex end = rev.getVertex(0);
 
-        System.out.println("Path " + path + " : " + start + " " + end);
+//        System.out.println("OF Path " + path + " : " + start + " " + end);
         Face faceL = externalFace.getStartToEndFace(start, end, path);
-        System.out.println("faceL " + faceL);
+//        System.out.println("OF faceL " + faceL);
         Face faceR = externalFace.getEndToStartFace(start, end, path);
-        System.out.println("faceR " + faceR);
+//        System.out.println("OF faceR " + faceR);
 
         embed(rev, start, end);
 
         externalFace = faceL;
+//        System.out.println("setting external face to " + externalFace);
         faces.add(faceR);
+//        System.out.println("adding " + faceR);
     }
 
     /**
@@ -199,19 +208,19 @@ public class BlockEmbedding {
      * @param face
      */
     public void add(Path path, Face face) {
-        // System.out.println("cm was" + combinatorialMap);
+//         System.out.println("cm was" + combinatorialMap);
         faces.remove(face);
 
         // split the face in two by adding the path
         Vertex start = path.getVertex(0);
         Vertex end = path.getVertex(path.vsize() - 1);
 
-        System.out.println("Path " + path + " : " + start + " " + end);
+//        System.out.println("Path " + path + " : " + start + " " + end + " embedding in " + face);
         
         Face faceL = face.getStartToEndFace(start, end, path);
-        System.out.println("face L = " + faceL);
+//        System.out.println("face L = " + faceL);
         Face faceR = face.getEndToStartFace(start, end, path);
-        System.out.println("face R = " + faceR);
+//        System.out.println("face R = " + faceR);
 
         // now add the path vertices to the CM
         embed(path, start, end);
@@ -219,6 +228,7 @@ public class BlockEmbedding {
         faces.add(faceL);
         faces.add(faceR);
         // System.out.println("cm now" + combinatorialMap);
+//        System.out.println("ext face " + externalFace);
     }
 
     private void embed(Path path, Vertex start, Vertex end) {
@@ -282,12 +292,13 @@ public class BlockEmbedding {
 
     public List<Face> getDrawableFaces(Bridge bridge) {
         List<Face> drawableFaces = new ArrayList<Face>();
+        List<Vertex> endpoints = bridge.getEndpoints();
         for (Face face : faces) {
             // basically, a bridge is drawable in a face only if
             // all its endpoints are in vertex list of that face
             // System.out.println("checking face " + face + " and " +
             // bridge.getEndpoints());
-            if (face.containsAllVertices(bridge.getEndpoints())) {
+            if (face.containsAllVertices(endpoints)) {
                 drawableFaces.add(face);
             }
         }

@@ -113,6 +113,7 @@ public class PlanarViewer extends JFrame implements ActionListener, MouseListene
                     ac.getAtom(v.getIndex()).setPoint2d(p2d);
                 }
                 GeometryTools.center(ac, size);
+                faceCenterMap.clear();
                 for (Face face : embedding.getFaces()) {
                     Point2d center = new Point2d();
                     for (Vertex v : face) {
@@ -134,7 +135,7 @@ public class PlanarViewer extends JFrame implements ActionListener, MouseListene
         
         private void reEmbed(Face face) {
             Face oldExternalFace = blockEmbedding.getExternalFace();
-            List<Face> faces = blockEmbedding.getFaces();
+            List<Face> faces = new ArrayList<Face>(blockEmbedding.getFaces());
             faces.remove(face);
             faces.add(oldExternalFace);
             
@@ -142,7 +143,12 @@ public class PlanarViewer extends JFrame implements ActionListener, MouseListene
             embedding.setExternalFace(face);
             embedding.setFaces(faces);
             layout(getSize(), embedding);
-            plateGenerator.embedding = blockEmbedding;
+            for (Face f : faces) {
+                System.out.println(f);
+            }
+            System.out.println("old ext face " + oldExternalFace);
+            System.out.println("new ext face " + face);
+            plateGenerator.embedding = embedding;
             repaint();
         }
         

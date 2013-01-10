@@ -78,7 +78,7 @@ public class PlanarBlockEmbedder {
         boolean embeddable = true;
 
         while (faceCount != eulerNumber && embeddable) {
-             System.out.println("Current block " + currentBlock);
+//             System.out.println("Current block " + currentBlock);
             embedding.setBlock(currentBlock); // XXX
             List<Bridge> bridges = findBridges(currentBlock, blockToEmbed);
             if (bridges.isEmpty()) {
@@ -88,10 +88,10 @@ public class PlanarBlockEmbedder {
             Map<Bridge, List<Face>> faceMap = 
                     embedding.getBridgeFaceCounts(bridges);
             Bridge chosenBridge = chooseBridge(faceMap);
-            System.out.println("Chosen bridge " + chosenBridge + " from " + faceMap);
+//            System.out.println("Chosen bridge " + chosenBridge + " from " + faceMap);
             if (chosenBridge == null) {
                 Face outerFace = embedding.getExternalFace();
-                System.out.println("embedding in outer face " + outerFace);
+//                System.out.println("embedding in outer face " + outerFace);
                 boolean embeddedInOuterFace = false;
                 for (Bridge bridge : bridges) {
                     if (outerFace.containsAllVertices(bridge.getEndpoints())) {

@@ -207,7 +207,7 @@ public class RingPlateGenerator implements IGenerator<IAtomContainer> {
         }
         List<IRingSet> ringEqCl = new ArrayList<IRingSet>();
         for (FaceCode code : faceEqCl.keySet()) {
-            System.out.println(code);
+//            System.out.println(code);
             List<Face> faces = faceEqCl.get(code);
             IRingSet ringSet = new RingSet();
             for (Face face : faces) {
