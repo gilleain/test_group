@@ -93,6 +93,14 @@ public class Fullerenes {
         return new ConcentricFaceLayout(RADIUS, EDGE_LEN).layout(blockEmbedding, new Rectangle2D.Double(0, 0, WIDTH, HEIGHT));
     }
     
+    public void apply(Representation rep, IAtomContainer ac) {
+        for (Vertex v : rep.getVertices()) {
+            Point2D point = rep.getPoint(v);
+            Point2d p2d = new Point2d(point.getX(), point.getY());
+            ac.getAtom(v.getIndex()).setPoint2d(p2d);
+        }
+    }
+    
     public void draw(Representation rep, BlockEmbedding embedding, 
                      IAtomContainer ac, int w, int h,
                      String file, boolean numberAtoms) throws FileNotFoundException, IOException {
@@ -103,11 +111,10 @@ public class Fullerenes {
 //            rep = new SpringRefiner(100).refine(rep, embedding);
 //            rep = new AnnealingRefiner(bigCanvas).refine(rep, embedding);
         }
-        for (Vertex v : rep.getVertices()) {
-            Point2D point = rep.getPoint(v);
-            Point2d p2d = new Point2d(point.getX(), point.getY());
-            ac.getAtom(v.getIndex()).setPoint2d(p2d);
-        }
+        
+        // set the points in the atoms
+        apply(rep, ac);
+        
         Image image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics = (Graphics2D) image.getGraphics();
         graphics.setColor(Color.WHITE);
@@ -232,6 +239,11 @@ public class Fullerenes {
     public void test_c24d6d() throws CDKException, IOException {
 //        testFullerene("C20-30", "c24d6d", new File("output", "C20-30"), true);
         testFullerene("C20-30", "c24d6d", new File("output", "C20-30"));
+    }
+    
+    @Test
+    public void test_No_4_Cs() throws CDKException, IOException {
+        testFullerene("C36", "No.4-Cs", new File("output", "C36"));
     }
     
     @Test

@@ -1,0 +1,42 @@
+HEADER created with the CDK (http://cdk.sf.net/)
+ATOM      1 C    MOL     0      -0.823   0.000  -0.567  1.00  0.00           C+0
+ATOM      2 C    MOL     0      -0.664   0.000  -0.748  1.00  0.00           C+0
+ATOM      3 C    MOL     0      -0.254   0.783  -0.567  1.00  0.00           C+0
+ATOM      4 C    MOL     0      -0.205   0.632  -0.748  1.00  0.00           C+0
+ATOM      5 C    MOL     0      -0.433   0.315  -0.844  1.00  0.00           C+0
+ATOM      6 C    MOL     0       0.666   0.484  -0.567  1.00  0.00           C+0
+ATOM      7 C    MOL     0       0.537   0.390  -0.748  1.00  0.00           C+0
+ATOM      8 C    MOL     0       0.166   0.509  -0.844  1.00  0.00           C+0
+ATOM      9 C    MOL     0       0.666  -0.484  -0.567  1.00  0.00           C+0
+ATOM     10 C    MOL     0       0.537  -0.390  -0.748  1.00  0.00           C+0
+ATOM     11 C    MOL     0       0.536   0.000  -0.844  1.00  0.00           C+0
+ATOM     12 C    MOL     0      -0.254  -0.783  -0.567  1.00  0.00           C+0
+ATOM     13 C    MOL     0      -0.205  -0.632  -0.748  1.00  0.00           C+0
+ATOM     14 C    MOL     0       0.166  -0.509  -0.844  1.00  0.00           C+0
+ATOM     15 C    MOL     0      -0.433  -0.315  -0.844  1.00  0.00           C+0
+ATOM     16 C    MOL     0      -0.230  -0.167  -0.959  1.00  0.00           C+0
+ATOM     17 C    MOL     0       0.088  -0.270  -0.959  1.00  0.00           C+0
+ATOM     18 C    MOL     0       0.284   0.000  -0.959  1.00  0.00           C+0
+ATOM     19 C    MOL     0       0.088   0.270  -0.959  1.00  0.00           C+0
+ATOM     20 C    MOL     0      -0.230   0.167  -0.959  1.00  0.00           C+0
+CONECT    1    2    3   12
+CONECT    2    1    5   15
+CONECT    3    1    4    6
+CONECT    4    3    5    8
+CONECT    5    2    4   20
+CONECT    6    3    9    7
+CONECT    7    6    8   11
+CONECT    8    4    7   19
+CONECT    9    6   10   12
+CONECT   10    9   14   11
+CONECT   11    7   10   18
+CONECT   12    1    9   13
+CONECT   13   12   14   15
+CONECT   14   10   13   17
+CONECT   15    2   13   16
+CONECT   16   15   20   17
+CONECT   17   14   16   18
+CONECT   18   11   17   19
+CONECT   19    8   18   20
+CONECT   20    5   16   19
+END   

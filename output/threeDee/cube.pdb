@@ -1,0 +1,18 @@
+HEADER created with the CDK (http://cdk.sf.net/)
+ATOM      1 C    MOL     0       0.687  -0.687   0.237  1.00  0.00           C+0
+ATOM      2 C    MOL     0       0.687   0.687   0.237  1.00  0.00           C+0
+ATOM      3 C    MOL     0      -0.687   0.687   0.237  1.00  0.00           C+0
+ATOM      4 C    MOL     0      -0.687  -0.687   0.237  1.00  0.00           C+0
+ATOM      5 C    MOL     0       0.444  -0.444  -0.778  1.00  0.00           C+0
+ATOM      6 C    MOL     0       0.444   0.444  -0.778  1.00  0.00           C+0
+ATOM      7 C    MOL     0      -0.444   0.444  -0.778  1.00  0.00           C+0
+ATOM      8 C    MOL     0      -0.444  -0.444  -0.778  1.00  0.00           C+0
+CONECT    1    2    4    5
+CONECT    2    1    3    6
+CONECT    3    2    4    7
+CONECT    4    1    3    8
+CONECT    5    1    6    8
+CONECT    6    2    5    7
+CONECT    7    3    6    8
+CONECT    8    4    5    7
+END   
