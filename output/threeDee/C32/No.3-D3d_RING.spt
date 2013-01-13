@@ -1,0 +1,17 @@
+draw cPoint CIRCLE (all) RADIUS 1;draw ring0 CIRCLE ({1 4 18 19 21}) $cPoint RADIUS 1.0 COLOR [170, 255, 0];
+draw ring1 CIRCLE ({16 17 22 23 26}) $cPoint RADIUS 1.0 COLOR [0, 0, 255];
+draw ring2 CIRCLE ({0 3 5 6 7}) $cPoint RADIUS 1.0 COLOR [0, 0, 255];
+draw ring3 CIRCLE ({4 21 22 23 31}) $cPoint RADIUS 1.0 COLOR [0, 0, 255];
+draw ring4 CIRCLE ({6 7 14 27 30}) $cPoint RADIUS 1.0 COLOR [0, 0, 255];
+draw ring5 CIRCLE ({23 25 26 28 31}) $cPoint RADIUS 1.0 COLOR [170, 255, 0];
+draw ring6 CIRCLE ({24 25 27 28 29 30}) $cPoint RADIUS 1.0 COLOR [0, 255, 170];
+draw ring7 CIRCLE ({2 3 7 29 30}) $cPoint RADIUS 1.0 COLOR [170, 255, 0];
+draw ring8 CIRCLE ({8 9 10 11 12 13}) $cPoint RADIUS 1.0 COLOR [0, 255, 170];
+draw ring9 CIRCLE ({10 13 15 16 17}) $cPoint RADIUS 1.0 COLOR [170, 255, 0];
+draw ring10 CIRCLE ({0 5 8 9 20}) $cPoint RADIUS 1.0 COLOR [170, 255, 0];
+draw ring11 CIRCLE ({11 12 14 24 27}) $cPoint RADIUS 1.0 COLOR [170, 255, 0];
+draw ring12 CIRCLE ({5 6 8 11 14}) $cPoint RADIUS 1.0 COLOR [0, 0, 255];
+draw ring13 CIRCLE ({9 10 15 18 19 20}) $cPoint RADIUS 1.0 COLOR [0, 255, 170];
+draw ring14 CIRCLE ({1 2 4 28 29 31}) $cPoint RADIUS 1.0 COLOR [0, 255, 170];
+draw ring15 CIRCLE ({0 1 2 3 19 20}) $cPoint RADIUS 1.0 COLOR [0, 255, 170];
+draw ring16 CIRCLE ({12 13 17 24 25 26}) $cPoint RADIUS 1.0 COLOR [0, 255, 170];

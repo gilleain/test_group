@@ -155,7 +155,7 @@ public class SignatureRingColorer {
         return new ArrayList<IRing>(ringSetColors.keySet());
     }
     
-    public Color getColorForRing(IRing ring) {
+    public Color getRingColor(IRing ring) {
         return ringSetColors.get(ring);
     }
 

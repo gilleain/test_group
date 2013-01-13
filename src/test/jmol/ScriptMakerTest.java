@@ -13,12 +13,16 @@ import jmol.ScriptMaker;
 import org.junit.Test;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
-import org.openscience.cdk.renderer.color.IAtomColorer;
 import org.openscience.cdk.silent.AtomContainer;
 
+import planar.BlockEmbedding;
+import planar.PlanarBlockEmbedder;
 import util.SignatureAtomColorer;
+import util.SignatureRingColorer;
 
 public class ScriptMakerTest {
+    
+    public enum AtomOrRing { ATOM, RING };
     
     public static final String DIR = 
             "/Users/maclean/Documents/molecules/FullereneLib/";
@@ -35,34 +39,56 @@ public class ScriptMakerTest {
         return atomContainer;
     }
     
-    public void test(String subDirName, String name) throws CDKException, IOException {
+    public void test(String subDirName, 
+                     String name, 
+                     AtomOrRing atomOrRing) throws CDKException, IOException {
         File subDir = new File(DIR, subDirName);
         IAtomContainer ac = readFile(new File(subDir, name + ".cc1"));
-        IAtomColorer atomColorer = new SignatureAtomColorer(ac);
         File outDir = new File("output/threeDee", subDirName);
         if (!outDir.exists()) {
             outDir.mkdirs();
         }
-        File outFile = new File(outDir, name + ".spt");
+        File outFile = new File(outDir, name + "_" + atomOrRing + ".spt");
         PrintStream fileOut = new PrintStream(new FileOutputStream(outFile));
-        ScriptMaker.printAtomColorScript(ac, atomColorer, fileOut);
+        if (atomOrRing == AtomOrRing.ATOM) {
+            ScriptMaker.printAtomColorScript(ac, new SignatureAtomColorer(ac), fileOut);
+        } else {
+            BlockEmbedding em = PlanarBlockEmbedder.embed(ac);
+            ScriptMaker.printRingColorScript(ac, new SignatureRingColorer(ac, em), fileOut);
+        }
         fileOut.flush();
         fileOut.close();
     }
     
     @Test
-    public void test_No3_D3d() throws CDKException, IOException {
-        test("C32", "No.3-D3d");
+    public void test_No3_D3d_atom() throws CDKException, IOException {
+        test("C32", "No.3-D3d", AtomOrRing.ATOM);
     }
     
     @Test
-    public void test_c24d6d() throws CDKException, IOException {
-        test("C20-30", "c24d6d");
+    public void test_c24d6d_atom() throws CDKException, IOException {
+        test("C20-30", "c24d6d", AtomOrRing.ATOM);
     }
     
     @Test
-    public void testC70() throws CDKException, IOException {
-        test("C60-76", "C70-D5h");
+    public void testC70_atom() throws CDKException, IOException {
+        test("C60-76", "C70-D5h", AtomOrRing.ATOM);
     }
+    
+    @Test
+    public void test_No3_D3d_ring() throws CDKException, IOException {
+        test("C32", "No.3-D3d", AtomOrRing.RING);
+    }
+    
+    @Test
+    public void test_c24d6d_ring() throws CDKException, IOException {
+        test("C20-30", "c24d6d", AtomOrRing.RING);
+    }
+    
+    @Test
+    public void testC70_ring() throws CDKException, IOException {
+        test("C60-76", "C70-D5h", AtomOrRing.RING);
+    }
+
 
 }

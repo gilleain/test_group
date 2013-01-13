@@ -63,7 +63,7 @@ public class RingPlateGenerator implements IGenerator<IAtomContainer> {
         
         for (IRing ring : ringColorer.getRings()) {
             Point2d center = GeometryTools.get2DCenter(ring);
-            Color color = ringColorer.getColorForRing(ring);
+            Color color = ringColorer.getRingColor(ring);
             ringPaths.add(generateRing(ring, center, color));
             if (shouldDrawRingNumbers.getValue()) {
                 int colorIndex;
