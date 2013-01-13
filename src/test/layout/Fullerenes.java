@@ -123,8 +123,7 @@ public class Fullerenes {
         generators.add(new BasicSceneGenerator());
         generators.add(new BasicBondGenerator());
         generators.add(new BasicAtomGenerator());
-        RingPlateGenerator plateGenerator = new RingPlateGenerator();
-        plateGenerator.embedding = embedding;
+        RingPlateGenerator plateGenerator = new RingPlateGenerator(embedding);
         generators.add(plateGenerator);
         if (numberAtoms) {
             generators.add(new MyAtomNumberGenerator());
@@ -137,6 +136,7 @@ public class Fullerenes {
         renderer.getRenderer2DModel().set(BasicAtomGenerator.AtomRadius.class, 2.0);
         renderer.getRenderer2DModel().set(BasicAtomGenerator.CompactShape.class, BasicAtomGenerator.Shape.OVAL);
         renderer.getRenderer2DModel().set(BasicAtomGenerator.KekuleStructure.class, true);
+        renderer.getRenderer2DModel().set(RingPlateGenerator.ShouldDrawRingNumbers.class, false);
         if (numberAtoms) {
             renderer.getRenderer2DModel().set(MyAtomNumberGenerator.AtomNumberStartCount.class, 0);
         }
@@ -303,7 +303,7 @@ public class Fullerenes {
     
     @Test
     public void testBucky() throws CDKException, IOException {
-        testFullerene("C60-76", "C60-Ih", new File("."));
+        testFullerene("C60-76", "C60-Ih", new File("output", "C60-76"));
     }
     
     @Test

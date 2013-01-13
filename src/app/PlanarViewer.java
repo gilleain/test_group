@@ -64,7 +64,9 @@ public class PlanarViewer extends JFrame implements ActionListener, MouseListene
 
     public class DrawPanel extends JPanel {
         
-        public boolean showNumbers;
+        public boolean showAtomNumbers;
+        
+        public boolean showRingNumbers;
 
         private IAtomContainer ac;
         
@@ -94,7 +96,7 @@ public class PlanarViewer extends JFrame implements ActionListener, MouseListene
                    layout(size);
                    setupRenderer();
                 }
-                draw(size.width, size.height, showNumbers, g);
+                draw(size.width, size.height, showAtomNumbers, showRingNumbers, g);
             }
         }
         
@@ -148,7 +150,7 @@ public class PlanarViewer extends JFrame implements ActionListener, MouseListene
             }
             System.out.println("old ext face " + oldExternalFace);
             System.out.println("new ext face " + face);
-            plateGenerator.embedding = embedding;
+            plateGenerator = new RingPlateGenerator(embedding);
             repaint();
         }
         
@@ -157,8 +159,7 @@ public class PlanarViewer extends JFrame implements ActionListener, MouseListene
             generators.add(new BasicSceneGenerator());
             generators.add(new BasicBondGenerator());
             generators.add(new BasicAtomGenerator());
-            plateGenerator = new RingPlateGenerator();
-            plateGenerator.embedding = blockEmbedding;
+            plateGenerator = new RingPlateGenerator(blockEmbedding);
             generators.add(plateGenerator);
             generators.add(new MyAtomNumberGenerator());
             fontManager = new AWTFontManager();
@@ -170,7 +171,7 @@ public class PlanarViewer extends JFrame implements ActionListener, MouseListene
             laidOut = false;
         }
 
-        public void draw(int w, int h, boolean numberAtoms, Graphics g) {
+        public void draw(int w, int h, boolean numberAtoms, boolean numberRings, Graphics g) {
             Rectangle canvas = new Rectangle(0, 0, w, h);
 
             Graphics2D graphics = (Graphics2D) g;
@@ -188,6 +189,11 @@ public class PlanarViewer extends JFrame implements ActionListener, MouseListene
                 model.set(MyAtomNumberGenerator.AtomNumberStartCount.class, 0);
             } else {
                 model.set(MyAtomNumberGenerator.WillDrawAtomNumbers.class, false);
+            }
+            if (numberRings) {
+                model.set(RingPlateGenerator.ShouldDrawRingNumbers.class, true);
+            } else {
+                model.set(RingPlateGenerator.ShouldDrawRingNumbers.class, false);
             }
             renderer.paint(ac, new AWTDrawVisitor(graphics), canvas, false);
         }
@@ -228,7 +234,9 @@ public class PlanarViewer extends JFrame implements ActionListener, MouseListene
 
     private JButton loadButton;
     
-    private JButton showNumbersButton;
+    private JButton showAtomNumbersButton;
+    
+    private JButton showRingNumbersButton;
 
     public PlanarViewer() {
         setLayout(new BorderLayout());
@@ -245,10 +253,15 @@ public class PlanarViewer extends JFrame implements ActionListener, MouseListene
         loadButton.addActionListener(this);
         buttonPanel.add(loadButton);
         
-        showNumbersButton = new JButton("Num");
-        showNumbersButton.setActionCommand("NUM");
-        showNumbersButton.addActionListener(this);
-        buttonPanel.add(showNumbersButton);
+        showAtomNumbersButton = new JButton("AtomNum");
+        showAtomNumbersButton.setActionCommand("ATOM_NUM");
+        showAtomNumbersButton.addActionListener(this);
+        buttonPanel.add(showAtomNumbersButton);
+        
+        showRingNumbersButton = new JButton("RingNum");
+        showRingNumbersButton.setActionCommand("RING_NUM");
+        showRingNumbersButton.addActionListener(this);
+        buttonPanel.add(showRingNumbersButton);
         
         add(buttonPanel, BorderLayout.SOUTH);
 
@@ -282,10 +295,14 @@ public class PlanarViewer extends JFrame implements ActionListener, MouseListene
             } catch (Exception e) {
                 // TODO
             }
-        } else {
-            view.showNumbers = !view.showNumbers;
+        } else if (event.getActionCommand().equals("ATOM_NUM")) {
+            view.showAtomNumbers = !view.showAtomNumbers;
+            view.repaint();
+        } else if (event.getActionCommand().equals("RING_NUM")) {
+            view.showRingNumbers = !view.showRingNumbers;
             view.repaint();
         }
+        
     }
 
     public static void main(String[] args) {

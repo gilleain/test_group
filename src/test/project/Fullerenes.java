@@ -120,6 +120,21 @@ public class Fullerenes {
     }
     
     @Test
+    public void test_No_9_C2v() throws CDKException, IOException {
+        testFullerene("C36", "No.9-C2v", new File("output/threeDee", "C36"));
+    }
+    
+    @Test
+    public void test_No_15_D6h() throws CDKException, IOException {
+        testFullerene("C36", "No.15-D6h", new File("output/threeDee", "C36"));
+    }
+    
+    @Test
+    public void test_No_11_C2() throws CDKException, IOException {
+        testFullerene("C36", "No.11-C2", new File("output/threeDee", "C36"));
+    }
+    
+    @Test
     public void test_No_32_C1() throws CDKException, IOException {
         testFullerene("C42", "No.32-C1", new File("output/threeDee", "C42"));
     }
@@ -130,6 +145,11 @@ public class Fullerenes {
     }
     
     @Test
+    public void test_No_3_D3d() throws CDKException, IOException {
+        testFullerene("C32", "No.3-D3d", new File("output/threeDee", "C32"));
+    }
+    
+    @Test
     public void test_c24d6d() throws CDKException, IOException {
         testFullerene("C20-30", "c24d6d", new File("output/threeDee", "C20-30"));
     }
@@ -137,6 +157,11 @@ public class Fullerenes {
     @Test
     public void testSmallest() throws CDKException, IOException {
         testFullerene("C20-30", "c20ih", new File("output/threeDee", "C20-30"));
+    }
+    
+    @Test
+    public void testC70D5h() throws CDKException, IOException {
+        testFullerene("C60-76", "C70-D5h", new File("output/threeDee", "C60-76"));
     }
     
     @Test
