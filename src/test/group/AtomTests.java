@@ -1,11 +1,18 @@
 package test.group;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.openscience.cdk.Atom;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
+import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.graph.invariant.EquivalentClassPartitioner;
 import org.openscience.cdk.group.AtomContainerPrinter;
@@ -13,9 +20,13 @@ import org.openscience.cdk.group.AtomDiscretePartitionRefiner;
 import org.openscience.cdk.group.Partition;
 import org.openscience.cdk.group.Permutation;
 import org.openscience.cdk.group.PermutationGroup;
+import org.openscience.cdk.inchi.InChIGeneratorFactory;
+import org.openscience.cdk.inchi.InChIToStructure;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
+import org.openscience.cdk.signature.MoleculeSignature;
+import org.openscience.cdk.signature.Orbit;
 import org.openscience.cdk.templates.MoleculeFactory;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
@@ -23,7 +34,102 @@ import util.ArrayToPartition;
 
 public class AtomTests {
 	
-	public final static IChemObjectBuilder builder = DefaultChemObjectBuilder.getInstance(); 
+	public final static IChemObjectBuilder builder = DefaultChemObjectBuilder.getInstance();
+	
+	@Test
+	public void vdwOtherTest() throws CDKException {
+	    String inchi = "InChI=1S/C27H56O/" +
+	    		"c1-8-9-10-11-12-13-14-15-16-17-18-19-20-21-22-23-24-27(28,25(2,3)4)26(5,6)7/" +
+	    		"h28H,8-24H2,1-7H3";
+	    InChIGeneratorFactory factory = InChIGeneratorFactory.getInstance();
+	    InChIToStructure parser = factory.getInChIToStructure(
+	            inchi, DefaultChemObjectBuilder.getInstance());
+	    IAtomContainer mol = parser.getAtomContainer();
+	    MoleculeSignature molSig = new MoleculeSignature(mol);
+        AtomDiscretePartitionRefiner refiner = new AtomDiscretePartitionRefiner();
+        PermutationGroup perm;
+        boolean useSignaturePartition = false;
+
+        if (useSignaturePartition) {
+              Partition signaturePartition = getSignaturePartition(molSig);
+              perm = refiner.getAutomorphismGroup(mol, signaturePartition);
+        } else {
+              perm = refiner.getAutomorphismGroup(mol);
+        }
+        System.out.println(perm.order());
+        System.out.println(order(perm));
+	}
+	
+	@Test
+	public void testTertTBut() {
+	    IAtomContainer mol = new AtomContainer();
+	    for (int i = 0; i < 16; i++) {
+	        mol.addAtom(new Atom("C"));
+	    }
+	    mol.addBond(0, 1, IBond.Order.SINGLE);
+	    mol.addBond(0, 2, IBond.Order.SINGLE);
+	    mol.addBond(0, 3, IBond.Order.SINGLE);
+	    mol.addBond(0, 4, IBond.Order.SINGLE);
+	    mol.addBond(1, 5, IBond.Order.SINGLE);
+        mol.addBond(1, 6, IBond.Order.SINGLE);
+        mol.addBond(1, 7, IBond.Order.SINGLE);
+        mol.addBond(2, 8, IBond.Order.SINGLE);
+        mol.addBond(2, 9, IBond.Order.SINGLE);
+        mol.addBond(2, 10, IBond.Order.SINGLE);
+        mol.addBond(3, 11, IBond.Order.SINGLE);
+        mol.addBond(3, 12, IBond.Order.SINGLE);
+        mol.addBond(3, 13, IBond.Order.SINGLE);
+        mol.addBond(4, 14, IBond.Order.SINGLE);
+        mol.addBond(4, 15, IBond.Order.SINGLE);
+        mol.addBond(4, 16, IBond.Order.SINGLE);
+        
+        MoleculeSignature molSig = new MoleculeSignature(mol);
+        AtomDiscretePartitionRefiner refiner = new AtomDiscretePartitionRefiner();
+        PermutationGroup perm;
+        boolean useSignaturePartition = false;
+
+        if (useSignaturePartition) {
+              Partition signaturePartition = getSignaturePartition(molSig);
+              perm = refiner.getAutomorphismGroup(mol, signaturePartition);
+        } else {
+              perm = refiner.getAutomorphismGroup(mol);
+        }
+        System.out.println(perm.order());
+        System.out.println(order(perm));
+	}
+	
+	public Partition getSignaturePartition(MoleculeSignature molSig) {
+	    List<Orbit> orbits = molSig.calculateOrbits();
+        Map<String, Orbit> orbitMap = new HashMap<String, Orbit>();
+        for (Orbit o : orbits) {
+            orbitMap.put(o.getLabel(), o);
+        }
+        List<String> keys = new ArrayList<String>();
+        keys.addAll(orbitMap.keySet());
+        Collections.sort(keys);
+        Partition partition = new Partition();
+        for (String key : keys) {
+            Orbit o = orbitMap.get(key);
+            partition.addCell(o.getAtomIndices());
+        }
+        return partition;
+	}
+	
+	 public int order(PermutationGroup perm) {
+	        // A group may have a size larger than Integer.MAX_INTEGER 
+	        // (2 ** 32 - 1) - for example sym(13) is larger.
+	        int total = 1;
+	        for (int i = 0; i < perm.getSize(); i++) {
+	            int sum = 0;
+	            for (int j = 0; j < perm.getSize(); j++) {
+	                if (perm.get(i, j) != null) {
+	                    sum++;
+	                }
+	            }
+	            total *= sum;
+	        }
+	        return total;
+	    }
 
 	@Test
 	public void testQuinone() throws Exception {
