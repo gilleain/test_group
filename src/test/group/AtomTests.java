@@ -36,34 +36,29 @@ public class AtomTests {
 	
 	public final static IChemObjectBuilder builder = DefaultChemObjectBuilder.getInstance();
 	
+	public IAtomContainer parseInchi(String inchi) throws CDKException {
+	    InChIGeneratorFactory factory = InChIGeneratorFactory.getInstance();
+        InChIToStructure parser = factory.getInChIToStructure(
+                inchi, DefaultChemObjectBuilder.getInstance());
+        return parser.getAtomContainer();
+	}
+	
 	@Test
 	public void vdwOtherTest() throws CDKException {
 	    String inchi = "InChI=1S/C27H56O/" +
 	    		"c1-8-9-10-11-12-13-14-15-16-17-18-19-20-21-22-23-24-27(28,25(2,3)4)26(5,6)7/" +
 	    		"h28H,8-24H2,1-7H3";
-	    InChIGeneratorFactory factory = InChIGeneratorFactory.getInstance();
-	    InChIToStructure parser = factory.getInChIToStructure(
-	            inchi, DefaultChemObjectBuilder.getInstance());
-	    IAtomContainer mol = parser.getAtomContainer();
-	    MoleculeSignature molSig = new MoleculeSignature(mol);
-        AtomDiscretePartitionRefiner refiner = new AtomDiscretePartitionRefiner();
-        PermutationGroup perm;
-        boolean useSignaturePartition = false;
-
-        if (useSignaturePartition) {
-              Partition signaturePartition = getSignaturePartition(molSig);
-              perm = refiner.getAutomorphismGroup(mol, signaturePartition);
-        } else {
-              perm = refiner.getAutomorphismGroup(mol);
-        }
-        System.out.println(perm.order());
-        System.out.println(order(perm));
+	    
+	    IAtomContainer mol = parseInchi(inchi);
+	    boolean useSignaturePartition = false;
+	    PermutationGroup perm = getGroup(mol, useSignaturePartition);
+	    System.out.println(perm.order() + "\n" + order(perm));
 	}
 	
 	@Test
-	public void testTertTBut() {
+	public void testTertTBut() throws CDKException {
 	    IAtomContainer mol = new AtomContainer();
-	    for (int i = 0; i < 16; i++) {
+	    for (int i = 0; i < 17; i++) {
 	        mol.addAtom(new Atom("C"));
 	    }
 	    mol.addBond(0, 1, IBond.Order.SINGLE);
@@ -83,19 +78,26 @@ public class AtomTests {
         mol.addBond(4, 15, IBond.Order.SINGLE);
         mol.addBond(4, 16, IBond.Order.SINGLE);
         
-        MoleculeSignature molSig = new MoleculeSignature(mol);
-        AtomDiscretePartitionRefiner refiner = new AtomDiscretePartitionRefiner();
-        PermutationGroup perm;
+//        String inchi = "InChI=1S/C17H36/c1-13(2,3)17(14(4,5)6,15(7,8)9)16(10,11)12/h1-12H3";
+	    String inchi = "InChI=1S/C17H36/c1-13(2,3)17(14(4,5)6,15(7,8)9)16(10,11)12";
+        IAtomContainer mol2 = parseInchi(inchi);
         boolean useSignaturePartition = false;
+//        PermutationGroup perm = getGroup(mol, useSignaturePartition);
+//        System.out.println(perm.order() + "\n" + order(perm));
+        System.out.println(AtomContainerPrinter.toString(mol, true));
+        System.out.println(AtomContainerPrinter.toString(mol2, true));
+	}
+	
+	public PermutationGroup getGroup(IAtomContainer mol, boolean useSignaturePartition ) {
+	    MoleculeSignature molSig = new MoleculeSignature(mol);
+        AtomDiscretePartitionRefiner refiner = new AtomDiscretePartitionRefiner();
 
         if (useSignaturePartition) {
               Partition signaturePartition = getSignaturePartition(molSig);
-              perm = refiner.getAutomorphismGroup(mol, signaturePartition);
+              return refiner.getAutomorphismGroup(mol, signaturePartition);
         } else {
-              perm = refiner.getAutomorphismGroup(mol);
+              return refiner.getAutomorphismGroup(mol);
         }
-        System.out.println(perm.order());
-        System.out.println(order(perm));
 	}
 	
 	public Partition getSignaturePartition(MoleculeSignature molSig) {
