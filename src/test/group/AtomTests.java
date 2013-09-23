@@ -82,10 +82,10 @@ public class AtomTests {
 	    String inchi = "InChI=1S/C17H36/c1-13(2,3)17(14(4,5)6,15(7,8)9)16(10,11)12";
         IAtomContainer mol2 = parseInchi(inchi);
         boolean useSignaturePartition = false;
-//        PermutationGroup perm = getGroup(mol, useSignaturePartition);
-//        System.out.println(perm.order() + "\n" + order(perm));
-        System.out.println(AtomContainerPrinter.toString(mol, true));
-        System.out.println(AtomContainerPrinter.toString(mol2, true));
+        PermutationGroup perm = getGroup(mol2, useSignaturePartition);
+        System.out.println(perm.order() + "\n" + order(perm));
+//        System.out.println(AtomContainerPrinter.toString(mol, true));
+//        System.out.println(AtomContainerPrinter.toString(mol2, true));
 	}
 	
 	public PermutationGroup getGroup(IAtomContainer mol, boolean useSignaturePartition ) {
