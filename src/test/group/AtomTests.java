@@ -1,5 +1,6 @@
 package test.group;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,12 +37,37 @@ public class AtomTests {
 	
 	public final static IChemObjectBuilder builder = DefaultChemObjectBuilder.getInstance();
 	
+	public BigInteger bigOrder(PermutationGroup perm) {
+	    BigInteger total = BigInteger.valueOf(1);
+        for (int i = 0; i < perm.getSize(); i++) {
+            int sum = 0;
+            for (int j = 0; j < perm.getSize(); j++) {
+                if (perm.get(i, j) != null) {
+                    sum++;
+                }
+            }
+            total = total.multiply(BigInteger.valueOf(sum));
+        }
+	    return total;
+	}
+	
 	public IAtomContainer parseInchi(String inchi) throws CDKException {
 	    InChIGeneratorFactory factory = InChIGeneratorFactory.getInstance();
         InChIToStructure parser = factory.getInChIToStructure(
                 inchi, DefaultChemObjectBuilder.getInstance());
         return parser.getAtomContainer();
 	}
+
+    @Test
+    public void largeTest() throws CDKException {
+        String inchi = "InChI=1S/C66H84O6/c1-61(2,3)49-25-37-19-39-27-50(62(4,5)6)29-41(56(39)68)21-43-31-52(64(10,11)12)33-45(58(43)70)23-47-35-54(66(16,17)18)36-48(60(47)72)24-46-34-53(65(13,14)15)32-44(59(46)71)22-42-30-51(63(7,8)9)28-40(57(42)69)20-38(26-49)55(37)67/h25-36,67-72H,19-24H2,1-18H3";
+	    IAtomContainer mol = parseInchi(inchi);
+	    AtomContainerManipulator.convertImplicitToExplicitHydrogens(mol);
+	    
+	    boolean useSignaturePartition = false;
+	    PermutationGroup perm = getGroup(mol, useSignaturePartition);
+	    System.out.println(perm.order() + "\n" + order(perm) + "\n" + bigOrder(perm));
+    }
 	
 	@Test
 	public void vdwOtherTest() throws CDKException {
@@ -83,7 +109,7 @@ public class AtomTests {
         IAtomContainer mol2 = parseInchi(inchi);
         boolean useSignaturePartition = false;
         PermutationGroup perm = getGroup(mol2, useSignaturePartition);
-        System.out.println(perm.order() + "\n" + order(perm));
+        System.out.println(perm.order() + "\n" + order(perm) + "\n" + bigOrder(perm));
 //        System.out.println(AtomContainerPrinter.toString(mol, true));
 //        System.out.println(AtomContainerPrinter.toString(mol2, true));
 	}
